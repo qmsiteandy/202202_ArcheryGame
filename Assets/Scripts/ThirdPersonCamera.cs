@@ -32,6 +32,8 @@ public class ThirdPersonCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (cameraHolder.gameObject.activeInHierarchy == false) return;
+
         if (axes == RotationAxes.MouseX)
         {
             _rotationY = _rotationY + Input.GetAxis("Mouse X") * sensitivityHor;

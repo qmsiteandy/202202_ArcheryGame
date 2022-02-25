@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class ShootController : MonoBehaviour
 {
+    [Header("Camera")]
+    public GameObject _3rePersonView;
+
     [Header("State")]
     public Animator animator;
     private enum status { idle, standBy, drawing, handling };
@@ -15,6 +18,11 @@ public class ShootController : MonoBehaviour
     public GameObject arrowPrefab;
     public float shootSpeed = 50f;
 
+    void Start()
+    {
+        _3rePersonView.SetActive(false);
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -22,6 +30,8 @@ public class ShootController : MonoBehaviour
         {
             //進入射擊預備狀態
             playerStatus = status.standBy;
+            //開啟第三人稱攝影機
+            _3rePersonView.SetActive(true);
         }
         else if (Input.GetKey(KeyCode.Space))
         {
@@ -57,9 +67,9 @@ public class ShootController : MonoBehaviour
             playerStatus = status.idle;
             //設定Animator
             animator.SetBool("Drawing", false);
+            //關閉第三人稱攝影機
+            _3rePersonView.SetActive(false);
         }
-
-        
     }
 
     //放箭
