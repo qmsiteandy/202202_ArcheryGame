@@ -30,7 +30,7 @@ public class ThirdPersonCamera : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if (cameraHolder.gameObject.activeInHierarchy == false) return;
 

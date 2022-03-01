@@ -18,9 +18,14 @@ public class ShootController : MonoBehaviour
     public GameObject arrowPrefab;
     public float shootSpeed = 50f;
 
+    [Header("ConcentretionSystem")]
+    public ConcentrationSystem concentrationSystem;
+    private bool isConcentretionSystemActive = false;
+
     void Start()
     {
         _3rePersonView.SetActive(false);
+        isConcentretionSystemActive = concentrationSystem.gameObject.activeInHierarchy;
     }
 
     // Update is called once per frame
@@ -32,6 +37,8 @@ public class ShootController : MonoBehaviour
             playerStatus = status.standBy;
             //開啟第三人稱攝影機
             _3rePersonView.SetActive(true);
+            //設定Animator
+            animator.SetBool("StandBy", true);
         }
         else if (Input.GetKey(KeyCode.Space))
         {
@@ -42,6 +49,8 @@ public class ShootController : MonoBehaviour
                 playerStatus = status.drawing;
                 //設定Animator
                 animator.SetBool("Drawing", true);
+                //進行專注度判斷
+                if (isConcentretionSystemActive) concentrationSystem.FocusDetectionStart();
             }
             //放弓
             if (Input.GetKeyUp(KeyCode.Mouse0))
@@ -56,9 +65,10 @@ public class ShootController : MonoBehaviour
 
                 //設定Animator
                 animator.SetBool("Drawing", false);
-
                 //設定狀態
                 playerStatus = status.standBy;
+                //停止專注度判斷
+                if (isConcentretionSystemActive) concentrationSystem.FocusDetectionReset();
             }
         }
         else if (Input.GetKeyUp(KeyCode.Space))
@@ -69,6 +79,19 @@ public class ShootController : MonoBehaviour
             animator.SetBool("Drawing", false);
             //關閉第三人稱攝影機
             _3rePersonView.SetActive(false);
+            //設定Animator
+            animator.SetBool("StandBy", false);
+            //停止專注度判斷
+            if (isConcentretionSystemActive) concentrationSystem.FocusDetectionReset();
+        }
+
+        //專注數值影響
+        if (isConcentretionSystemActive)
+        {
+            if (playerStatus == status.drawing || playerStatus == status.handling)
+            {
+
+            }
         }
     }
 
