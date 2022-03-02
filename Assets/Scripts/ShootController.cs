@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using DG.Tweening;
 
 public class ShootController : MonoBehaviour
 {
@@ -21,11 +23,22 @@ public class ShootController : MonoBehaviour
     [Header("ConcentretionSystem")]
     public ConcentrationSystem concentrationSystem;
     private bool isConcentretionSystemActive = false;
+    public GameObject maskCanvas;
+    public GameObject concermMask;
+    public GameObject normalMask;
 
     void Start()
     {
+        //關閉隨滑鼠移動的攝影機
         _3rePersonView.SetActive(false);
+
+        //判斷是否有專注系統
         isConcentretionSystemActive = concentrationSystem.gameObject.activeInHierarchy;
+        //設定mask
+        normalMask.SetActive(isConcentretionSystemActive == false);
+        concermMask.SetActive(isConcentretionSystemActive == true);
+        concermMask.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0f);
+        maskCanvas.SetActive(false);
     }
 
     // Update is called once per frame
@@ -51,6 +64,8 @@ public class ShootController : MonoBehaviour
                 animator.SetBool("Drawing", true);
                 //進行專注度判斷
                 if (isConcentretionSystemActive) concentrationSystem.FocusDetectionStart();
+                //設定Mask
+                maskCanvas.SetActive(true);
             }
             //放弓
             if (Input.GetKeyUp(KeyCode.Mouse0))
@@ -69,6 +84,8 @@ public class ShootController : MonoBehaviour
                 playerStatus = status.standBy;
                 //停止專注度判斷
                 if (isConcentretionSystemActive) concentrationSystem.FocusDetectionReset();
+                //設定Mask
+                maskCanvas.SetActive(false);
             }
         }
         else if (Input.GetKeyUp(KeyCode.Space))
@@ -83,6 +100,8 @@ public class ShootController : MonoBehaviour
             animator.SetBool("StandBy", false);
             //停止專注度判斷
             if (isConcentretionSystemActive) concentrationSystem.FocusDetectionReset();
+            //設定Mask
+            maskCanvas.SetActive(false);
         }
 
         //專注數值影響
@@ -90,7 +109,7 @@ public class ShootController : MonoBehaviour
         {
             if (playerStatus == status.drawing || playerStatus == status.handling)
             {
-
+                concermMask.GetComponent<Image>().DOFade(concentrationSystem.concentration, 0.15f);
             }
         }
     }
@@ -103,6 +122,7 @@ public class ShootController : MonoBehaviour
         newArrow.GetComponent<Rigidbody>().AddForce(newArrow.transform.forward * shootSpeed);
     }
 
+    //拉弓動畫完成時呼叫
     public void ArrowReady()
     {
         playerStatus = status.handling;
