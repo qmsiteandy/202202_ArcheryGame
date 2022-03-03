@@ -38,6 +38,9 @@ public class ArrowController : MonoBehaviour
             rigidbody.velocity = Vector3.zero;
             rigidbody.isKinematic = true;
 
+            //關閉碰撞器
+            this.GetComponent<Collider>().enabled = false;
+
             //算分數
             int score = collision.gameObject.GetComponent<RingData>().score;
             GameObject.Find("GameManager").GetComponent<ShootRecorder>().Record(score);
@@ -46,5 +49,10 @@ public class ArrowController : MonoBehaviour
             //1秒後刪除跟隨的鏡頭
             Destroy(this.GetComponentInChildren<CinemachineVirtualCamera>().gameObject, 1f);
         }
+    }
+
+    public void DestroyArrow()
+    {
+        Destroy(this.gameObject);
     }
 }

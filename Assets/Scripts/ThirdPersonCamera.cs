@@ -68,6 +68,10 @@ public class ThirdPersonCamera : MonoBehaviour
 
         //設定相機旋轉
         cameraHolder.localEulerAngles = new Vector3(_rotationX + noiseRotateX, _rotationY + noiseRotateY, 0);
+    }
 
+    public void ResetAngle()
+    {
+        _rotationX = _rotationY = 0f;
     }
 }

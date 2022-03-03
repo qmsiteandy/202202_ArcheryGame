@@ -128,6 +128,9 @@ public class ShootController : MonoBehaviour
 
         //紀錄箭數量減一
         shootRecorder.Shoot();
+
+        //射出後視角重置
+        this.gameObject.GetComponent<ThirdPersonCamera>().ResetAngle();
     }
 
     //拉弓動畫完成時呼叫
