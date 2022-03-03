@@ -36,7 +36,7 @@ public class ConcentrationSystem : MonoBehaviour
     [Header("Gaze Detection")]
     private Vector2 gazePos;    //目前凝視位置
     private float thresholdDistance = 50f;   //誤差距離閾值，若瞬間位移超過此值，判定可能是數值誤差
-    private float errorThresholdTime = 0.5f;   //誤差判定時間，若誤差持續時間小於此值，判定是誤差
+    private float errorThresholdTime = 0.25f;   //誤差判定時間，若誤差持續時間小於此值，判定是誤差
     private float errorThresholdTimer = 0f;
     private float gazeHoldingTime = 1f;   //凝視時間，大於此閾值才算有專注
     private float gazeHoldingTimer = 0f;

@@ -5,6 +5,8 @@ using Cinemachine;
 
 public class ArrowController : MonoBehaviour
 {
+    public AudioSource audio_hit;
+
     private Rigidbody rigidbody;
     private bool isHit = false;
     private float timer = 0f;
@@ -22,6 +24,14 @@ public class ArrowController : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
+
+        if (!isHit)
+        {
+            //設定箭方向與飛行方向平行
+            Vector3 speed = rigidbody.velocity.normalized;
+            Vector3 rotation = new Vector3(-Mathf.Atan(speed.y / speed.z) / Mathf.PI * 180f, Mathf.Atan(speed.x / speed.z) / Mathf.PI * 180f, 0f);
+            this.transform.rotation = Quaternion.Euler(rotation);
+        }
     }
 
     void OnCollisionEnter(Collision collision)
@@ -32,6 +42,9 @@ public class ArrowController : MonoBehaviour
             if (isHit) return;
 
             isHit = true;
+
+            //播放擊中音效
+            audio_hit.Play();
 
             //讓箭停止在靶上
             rigidbody.useGravity = false;

@@ -20,6 +20,8 @@ public class ShootController : MonoBehaviour
     public Transform targetPoint;
     public GameObject arrowPrefab;
     public float shootSpeed = 50f;
+    public AudioSource audio_draw;
+    public AudioSource audio_shoot;
 
     [Header("ConcentretionSystem")]
     public ConcentrationSystem concentrationSystem;
@@ -70,6 +72,8 @@ public class ShootController : MonoBehaviour
                 if (isConcentretionSystemActive) concentrationSystem.FocusDetectionStart();
                 //設定Mask
                 maskCanvas.SetActive(true);
+                //播放拉弓音效
+                audio_draw.Play();
             }
             //放弓
             if (Input.GetKeyUp(KeyCode.Mouse0))
@@ -78,8 +82,12 @@ public class ShootController : MonoBehaviour
                 {
                     //設定Animator
                     animator.SetTrigger("Shoot");
+                    //播放射出音效
+                    audio_shoot.Play();
                     //放箭
                     Shoot();
+                    //射出後視角重置
+                    this.gameObject.GetComponent<ThirdPersonCamera>().ResetAngle();
                 }
 
                 //設定Animator
@@ -128,9 +136,6 @@ public class ShootController : MonoBehaviour
 
         //紀錄箭數量減一
         shootRecorder.Shoot();
-
-        //射出後視角重置
-        this.gameObject.GetComponent<ThirdPersonCamera>().ResetAngle();
     }
 
     //拉弓動畫完成時呼叫
