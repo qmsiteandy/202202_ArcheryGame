@@ -56,9 +56,12 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\AnimationDrawFinish.cs" />
+     <Compile Include="Assets\Scripts\ArrowController.cs" />
      <Compile Include="Assets\Scripts\ConcentrationSystem.cs" />
      <Compile Include="Assets\Scripts\Models\AzureFaceResponse.cs" />
+     <Compile Include="Assets\Scripts\RingData.cs" />
      <Compile Include="Assets\Scripts\ShootController.cs" />
+     <Compile Include="Assets\Scripts\ShootRecorder.cs" />
      <Compile Include="Assets\Scripts\SoundController.cs" />
      <Compile Include="Assets\Scripts\ThirdPersonCamera.cs" />
      <Compile Include="Assets\Scripts\WebCamController.cs" />
@@ -273,11 +276,11 @@
  <Reference Include="UnityEngine.XRModule">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2019.3.6f1/Editor/Data/Managed/UnityEngine/UnityEngine.XRModule.dll</HintPath>
  </Reference>
- <Reference Include="clipper_library">
- <HintPath>C:/Users/ht930/Desktop/202202_ArcheryGame/Library/PackageCache/com.unity.cinemachine@2.7.9/Runtime/ThirdParty/clipper_library.dll</HintPath>
- </Reference>
  <Reference Include="DOTween">
  <HintPath>C:/Users/ht930/Desktop/202202_ArcheryGame/Assets/Plugins/Demigiant/DOTween/DOTween.dll</HintPath>
+ </Reference>
+ <Reference Include="clipper_library">
+ <HintPath>C:/Users/ht930/Desktop/202202_ArcheryGame/Library/PackageCache/com.unity.cinemachine@2.7.9/Runtime/ThirdParty/clipper_library.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.iOS.Extensions.Xcode">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2019.3.6f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>

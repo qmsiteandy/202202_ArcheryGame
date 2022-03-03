@@ -83,8 +83,8 @@ public class ConcentrationSystem : MonoBehaviour
                 azureFaceResponse.faceList[0].faceAttributes.emotion.anger * 0.25f +
                 azureFaceResponse.faceList[0].faceAttributes.emotion.fear * 0.3f;
 
-            //表情偵測為不專心(0.8是自己測試的數值)
-            if (emotionValue < 0.8f)
+            //表情偵測為不專心(0.5是自己測試的數值)
+            if (emotionValue < 0.5f)
             {
                 //設定Header文字
                 t_header.text = "情緒偵測為不專心";

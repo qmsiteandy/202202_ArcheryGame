@@ -15,6 +15,7 @@ public class ShootController : MonoBehaviour
     private status playerStatus = status.idle;
 
     [Header("Shoot")]
+    public ShootRecorder shootRecorder;
     public Transform initPoint;
     public Transform targetPoint;
     public GameObject arrowPrefab;
@@ -44,6 +45,9 @@ public class ShootController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //沒箭了
+        if (shootRecorder._arrow_number <= 0) return;
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //進入射擊預備狀態
@@ -117,9 +121,13 @@ public class ShootController : MonoBehaviour
     //放箭
     void Shoot()
     {
+        //生成箭並射出
         GameObject newArrow = Instantiate(arrowPrefab, initPoint.position, Quaternion.identity);
         newArrow.transform.LookAt(targetPoint.position);
         newArrow.GetComponent<Rigidbody>().AddForce(newArrow.transform.forward * shootSpeed);
+
+        //紀錄箭數量減一
+        shootRecorder.Shoot();
     }
 
     //拉弓動畫完成時呼叫
