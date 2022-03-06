@@ -48,7 +48,7 @@ public class ShootController : MonoBehaviour
     void Update()
     {
         //沒箭了
-        if (shootRecorder._arrow_number <= 0) return;
+        if (shootRecorder.arrow_count <= 0) return;
 
         if (Input.GetKeyDown(KeyCode.Space))
         {

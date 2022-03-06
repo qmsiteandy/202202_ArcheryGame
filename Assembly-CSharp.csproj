@@ -57,7 +57,10 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\AnimationDrawFinish.cs" />
      <Compile Include="Assets\Scripts\ArrowController.cs" />
+     <Compile Include="Assets\Scripts\ClickToNextScene.cs" />
      <Compile Include="Assets\Scripts\ConcentrationSystem.cs" />
+     <Compile Include="Assets\Scripts\GameManager.cs" />
+     <Compile Include="Assets\Scripts\IntroPage.cs" />
      <Compile Include="Assets\Scripts\Models\AzureFaceResponse.cs" />
      <Compile Include="Assets\Scripts\RingData.cs" />
      <Compile Include="Assets\Scripts\ShootController.cs" />

@@ -22,6 +22,7 @@ public class ArrowController : MonoBehaviour
         timer += Time.deltaTime;
         if(timer > 3f && !isHit)
         {
+            GameObject.Find("ShootRecorder").GetComponent<ShootRecorder>().Record(0);
             Destroy(this.gameObject);
         }
 
@@ -56,7 +57,7 @@ public class ArrowController : MonoBehaviour
 
             //算分數
             int score = collision.gameObject.GetComponent<RingData>().score;
-            GameObject.Find("GameManager").GetComponent<ShootRecorder>().Record(score);
+            GameObject.Find("ShootRecorder").GetComponent<ShootRecorder>().Record(score);
             Debug.Log(score);
 
             //1秒後刪除跟隨的鏡頭
