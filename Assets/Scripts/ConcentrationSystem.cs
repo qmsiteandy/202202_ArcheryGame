@@ -30,7 +30,8 @@ public class ConcentrationSystem : MonoBehaviour
     [Header("Azure Detection")]
     [SerializeField] private AzureFaceResponse azureFaceResponse = new AzureFaceResponse();
     private float detectInterval = 0.25f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
-    private Coroutine coroutine_LoopDetectFace;
+    private float intervalTimer = 0f;
+    //private Coroutine coroutine_LoopDetectFace;
     private bool isDetecting = false;
 
     [Header("Gaze Detection")]
@@ -58,8 +59,23 @@ public class ConcentrationSystem : MonoBehaviour
 
     private void Update()
     {
-        if(isDetecting)
+        //由公開函式設定isDetecting
+        if (isDetecting)
         {
+            //Azure Requese Interval，考量Azure免費方案有呼叫API頻率限制
+            intervalTimer -= Time.deltaTime;
+            if (intervalTimer <= 0f)
+            {
+                //重置倒數時間
+                intervalTimer = detectInterval;
+
+                //取得鏡頭畫面並呼叫AZURE偵測
+                byte[] imageBytes = this.GetComponent<WebCamController>().GetImageBytes();
+                if (imageBytes != null) AzureDetectImage(imageBytes);
+            }
+            
+
+#region -----專注度判斷-----
             //沒有偵測到人臉
             if (azureFaceResponse.faceList.Length == 0)
             {
@@ -162,6 +178,7 @@ public class ConcentrationSystem : MonoBehaviour
                     }
                 }
             }
+#endregion  -----專注度判斷-----
 
             //專注狀態，慢慢增加專注度
             if (concentration < 1f) concentration += 1f / concentrationRecoveryTime * Time.deltaTime;
@@ -179,7 +196,6 @@ public class ConcentrationSystem : MonoBehaviour
         faceDetectUI.SetActive(true);
         //開始執行判斷
         isDetecting = true;
-        coroutine_LoopDetectFace = StartCoroutine(LoopDetectFace());
     }
 
     public void FocusDetectionReset()
@@ -188,20 +204,8 @@ public class ConcentrationSystem : MonoBehaviour
         faceDetectUI.SetActive(false);
         //停止判斷
         isDetecting = false;
-        if (coroutine_LoopDetectFace != null) StopCoroutine(coroutine_LoopDetectFace);
         //專注度歸零
         concentration = 0f;
-    }
-
-    private IEnumerator LoopDetectFace()
-    {
-        while (true)
-        {
-            byte[] imageBytes = this.GetComponent<WebCamController>().GetImageBytes();
-            if (imageBytes != null) AzureDetectImage(imageBytes);
-
-            yield return new WaitForSeconds(detectInterval);
-        }
     }
 
     private async void AzureDetectImage(byte[] imageBytes)
@@ -227,7 +231,7 @@ public class ConcentrationSystem : MonoBehaviour
             if (www.isNetworkError)
             {
                 Debug.LogError($"statue:{www.responseCode} error:{www.error}");
-                OnAzureDetectFail(www.responseCode, www.error);
+                ShowAzureError(www.responseCode, www.error);
             }
 
             if (www.isDone)
@@ -239,18 +243,18 @@ public class ConcentrationSystem : MonoBehaviour
 
                     azureFaceResponse = JsonUtility.FromJson<AzureFaceResponse>("{\"faceList\":" + data + "}");
 
-                    OnAzureDetectSuccess(azureFaceResponse);
+                    ShowAzureResponse(azureFaceResponse);
                 }
                 else
                 {
                     Debug.LogError($"statue:{www.responseCode} error:{www.error}");
-                    OnAzureDetectFail(www.responseCode, www.error);
+                    ShowAzureError(www.responseCode, www.error);
                 }
             }
         }
     }
 
-    private void OnAzureDetectSuccess(AzureFaceResponse azureFaceResponse)
+    private void ShowAzureResponse(AzureFaceResponse azureFaceResponse)
     {
         #region //設定UI顯示內容
 
@@ -278,7 +282,7 @@ public class ConcentrationSystem : MonoBehaviour
         #endregion
     }
 
-    private void OnAzureDetectFail(long responseCode, string error)
+    private void ShowAzureError(long responseCode, string error)
     {
         t_header.text = $"偵測失敗錯誤代碼{responseCode}";
         t_console1.text = error;
