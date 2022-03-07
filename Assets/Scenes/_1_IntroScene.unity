@@ -270,11 +270,6 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8499349960352010257, guid: 0f733eddbc9e166459d46a2bb7c62f78,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8499349960647651093, guid: 0f733eddbc9e166459d46a2bb7c62f78,
         type: 3}
       propertyPath: bgm_audio
@@ -835,7 +830,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u5C04\u7BAD\u57FA\u790E\u64CD\u4F5C\u6559\u5B78"
+  m_Text: "\u3010\u5C04\u7BAD\u57FA\u790E\u64CD\u4F5C\u6559\u5B78\u3011"
 --- !u!222 &676572065
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1395,7 +1390,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0.000011444, y: -499.90002}
+  m_AnchoredPosition: {x: 0.000011444, y: -442}
   m_SizeDelta: {x: 1089, y: 463.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1489623549
@@ -1429,7 +1424,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1.5
-  m_Text: "1.\u6309\u4F4F\u3010\u7A7A\u767D\u5EFA\u3011\u9032\u5165\u9810\u5099\u59FF\u52E2\n2.\u6309\u4F4F\u3010\u6ED1\u9F20\u5DE6\u9375\u3011\u62C9\u5F13\n3.\u3010\u6ED1\u9F20\u79FB\u52D5\u3011\u9032\u884C\u7784\u6E96\n4.\u653E\u958B\u3010\u6ED1\u9F20\u5DE6\u9375\u3011\u653E\u5F13\n\n\u6BCF\u4E00\u5C4010\u652F\u7BAD\uFF0C\u9776\u7531\u5167\u800C\u5916\u70BA5/4/3/2/1\u5206\n\n-----------------------------------------\n\n\u6E96\u5099\u597D\u4E86\u55CE\uFF01\n"
+  m_Text: "\u9019\u662F\u6559\u5B78\u95DC\u4E0D\u6703\u7B97\u5206\n\n1.\u6309\u4F4F\u3010\u7A7A\u767D\u5EFA\u3011\u9032\u5165\u9810\u5099\u59FF\u52E2\n2.\u6309\u4F4F\u3010\u6ED1\u9F20\u5DE6\u9375\u3011\u62C9\u5F13\n3.\u3010\u6ED1\u9F20\u79FB\u52D5\u3011\u9032\u884C\u7784\u6E96\n4.\u653E\u958B\u3010\u6ED1\u9F20\u5DE6\u9375\u3011\u653E\u5F13\n\n\u6BCF\u4E00\u5C4010\u652F\u7BAD\uFF0C\u9776\u7531\u5167\u800C\u5916\u70BA5/4/3/2/1\u5206\n\n-----------------------------------------\n\n\u6E96\u5099\u597D\u4E86\u55CE\uFF01\n"
 --- !u!222 &1489623550
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1599,7 +1594,7 @@ PrefabInstance:
     - target: {fileID: 7456387385150855936, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -21.564388
+      value: -21.251999
       objectReference: {fileID: 0}
     - target: {fileID: 7456387385150855936, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}
@@ -1609,27 +1604,27 @@ PrefabInstance:
     - target: {fileID: 7456387385150855936, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0.0001518847
       objectReference: {fileID: 0}
     - target: {fileID: 7456387385150855936, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: -0.012130102
       objectReference: {fileID: 0}
     - target: {fileID: 7456387385150855936, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0.0021415378
       objectReference: {fileID: 0}
     - target: {fileID: 7456387385150855936, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.9999242
       objectReference: {fileID: 0}
     - target: {fileID: 7456387385150855936, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -31.810211
+      value: -32.70321
       objectReference: {fileID: 0}
     - target: {fileID: 7456387385150855939, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}
@@ -1644,7 +1639,7 @@ PrefabInstance:
     - target: {fileID: 7456387385150855939, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}
       propertyPath: field of view
-      value: 60
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 7456387385150855939, guid: 5bc657829e04ca54bbdf37ca4fcf0a8d,
         type: 3}

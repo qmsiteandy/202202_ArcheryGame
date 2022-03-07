@@ -16,7 +16,7 @@ public class ArrowController : MonoBehaviour
         rigidbody = this.GetComponent<Rigidbody>();
     }
 
-    void Update()
+    void LateUpdate()
     {
         //射出後三秒如果沒有命中，刪除此箭
         timer += Time.deltaTime;
@@ -26,13 +26,15 @@ public class ArrowController : MonoBehaviour
             Destroy(this.gameObject);
         }
 
-        if (!isHit)
+        //飛行期間
+        if (rigidbody.isKinematic == false)
         {
             //設定箭方向與飛行方向平行
             Vector3 speed = rigidbody.velocity.normalized;
             Vector3 rotation = new Vector3(-Mathf.Atan(speed.y / speed.z) / Mathf.PI * 180f, Mathf.Atan(speed.x / speed.z) / Mathf.PI * 180f, 0f);
-            this.transform.rotation = Quaternion.Euler(rotation);
+            if (float.IsNaN(rotation.y) == false) this.transform.rotation = Quaternion.Euler(rotation);
         }
+        
     }
 
     void OnCollisionEnter(Collision collision)
@@ -62,6 +64,19 @@ public class ArrowController : MonoBehaviour
 
             //1秒後刪除跟隨的鏡頭
             Destroy(this.GetComponentInChildren<CinemachineVirtualCamera>().gameObject, 1f);
+            //1秒後刪除此腳本
+            Destroy(this);
+        }
+        //撞到其他東西
+        else
+        {
+            //讓箭停止
+            rigidbody.useGravity = false;
+            rigidbody.velocity = Vector3.zero;
+            rigidbody.isKinematic = true;
+
+            //關閉碰撞器
+            this.GetComponent<Collider>().enabled = false;
         }
     }
 

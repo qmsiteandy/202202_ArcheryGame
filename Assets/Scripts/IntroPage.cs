@@ -7,6 +7,10 @@ public class IntroPage : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.Space) && Input.GetKey(KeyCode.Mouse0)) this.gameObject.SetActive(false);
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            this.gameObject.SetActive(false);
+            this.enabled = false;   
+        }
     }
 }
