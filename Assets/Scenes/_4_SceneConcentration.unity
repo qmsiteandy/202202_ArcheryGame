@@ -136,7 +136,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &142314539
 Transform:
   m_ObjectHideFlags: 0
@@ -169,6 +169,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d835596ecbad484482de258bc590063, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &892778230 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8499349959829528191, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+    type: 3}
+  m_PrefabInstance: {fileID: 8499349959081508160}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e11d6deb808842d44a174c33159e61fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!82 &1099669245 stripped
@@ -539,10 +551,22 @@ PrefabInstance:
     - target: {fileID: 114159413638650230, guid: 8b4e4ddc023712f44a95397307ccaf60,
         type: 3}
       propertyPath: m_ShowDataPackets
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8b4e4ddc023712f44a95397307ccaf60, type: 3}
+--- !u!114 &2125695144 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114548404811646288, guid: 8b4e4ddc023712f44a95397307ccaf60,
+    type: 3}
+  m_PrefabInstance: {fileID: 1756415242}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eb3bc418a0f5064f9ab597b87a4866c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &310379246599833000
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -987,6 +1011,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8624390752591734001, guid: db4c079aa7fdb2144b98175276cb637f,
+        type: 3}
+      propertyPath: concentrationSystem
+      value: 
+      objectReference: {fileID: 892778230}
+    - target: {fileID: 8624390752591734001, guid: db4c079aa7fdb2144b98175276cb637f,
+        type: 3}
+      propertyPath: m_Calibrator
+      value: 
+      objectReference: {fileID: 2125695144}
     - target: {fileID: 8624390752591734542, guid: db4c079aa7fdb2144b98175276cb637f,
         type: 3}
       propertyPath: m_Name
