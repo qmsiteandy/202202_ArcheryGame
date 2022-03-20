@@ -44,8 +44,9 @@ public class ConcentrationSystem : MonoBehaviour
     private bool isGazeHolding = false; //偵測是否判斷為凝視狀態
 
     [Header("Concentration Detect")]
+    public bool isFocus = false;
     [Range(0, 1)] public float concentration = 0f;    //專注度
-    public float concentrationRecoveryTime = 3f;    //從0->1慢慢增加的時間
+    public float concentrationRecoveryTime = 5f;    //從0->1慢慢增加的時間
 
     [Header("UI")]
     public GameObject faceDetectUI;
@@ -75,114 +76,127 @@ public class ConcentrationSystem : MonoBehaviour
             }
             
 
-#region -----專注度判斷-----
+        #region -----專注度判斷-----
             //沒有偵測到人臉
             if (azureFaceResponse.faceList.Length == 0)
             {
                 //設定Header文字
                 t_header.text = "偵測不到臉部";
 
-                //重置專注度
-                concentration = 0f;
+                //設定專注狀態
+                isFocus = false;
+
                 //設定外框顏色
                 outline.effectColor = Color.red;
-
-                return;
             }
-
-            //依權重計算表情專注分數
-            float emotionValue = azureFaceResponse.faceList[0].faceAttributes.emotion.neutral * 0.9f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.happiness * 0.6f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.surprise * 0.6f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.sadness * 0.3f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.disgust * 0.2f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.anger * 0.25f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.fear * 0.3f;
-
-            //表情偵測為不專心(0.5是自己測試的數值)
-            if (emotionValue < 0.5f)
-            {
-                //設定Header文字
-                t_header.text = "情緒偵測為不專心";
-
-                //重置專注度
-                concentration = 0f;
-                //設定外框顏色
-                outline.effectColor = Color.red;
-
-                return;
-            }
-
-            //凝視位置取左右瞳孔位置中點
-            Vector2 newGazePos = new Vector2(
-                (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.x + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.x) * 0.5f,
-                (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.y + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.y) * 0.5f);
-
-            if (gazePos == null) gazePos = newGazePos;
             else
             {
-                //瞳孔位移過大，但可能是誤差，需再判斷
-                if (Vector2.SqrMagnitude(newGazePos - gazePos) > thresholdDistance)
+                //依權重計算表情專注分數
+                float emotionValue = azureFaceResponse.faceList[0].faceAttributes.emotion.neutral * 0.9f +
+                    azureFaceResponse.faceList[0].faceAttributes.emotion.happiness * 0.6f +
+                    azureFaceResponse.faceList[0].faceAttributes.emotion.surprise * 0.6f +
+                    azureFaceResponse.faceList[0].faceAttributes.emotion.sadness * 0.3f +
+                    azureFaceResponse.faceList[0].faceAttributes.emotion.disgust * 0.2f +
+                    azureFaceResponse.faceList[0].faceAttributes.emotion.anger * 0.25f +
+                    azureFaceResponse.faceList[0].faceAttributes.emotion.fear * 0.3f;
+
+                //表情偵測為不專心(0.5是自己測試的數值)
+                if (emotionValue < 0.5f)
                 {
-                    //Debug.Log(Vector2.SqrMagnitude(newGazePos - gazePos));
+                    //設定Header文字
+                    t_header.text = "情緒偵測為不專心";
 
-                    //計時是否持續，若持續時間超過閾值，代表此位移為真
-                    if (errorThresholdTimer == 0f) errorThresholdTimer = errorThresholdTime;
-                    else
-                    {   //倒數
-                        errorThresholdTimer = errorThresholdTimer - Time.deltaTime > 0f ? errorThresholdTimer - Time.deltaTime : 0f;
-                        //確定為位移
-                        if (errorThresholdTimer == 0f)
-                        {
-                            //重置凝視狀態
-                            isGazeHolding = false;
-                            //設定Header文字
-                            t_header.text = "瞳孔位移過快不專心";
+                    //設定專注狀態
+                    isFocus = false;
 
-                            //紀錄新的瞳孔位置
-                            gazePos = newGazePos;
-                            //重置專注度
-                            concentration = 0f;
-                            //設定外框顏色
-                            outline.effectColor = Color.red;
-
-                            return;
-                        }
-                    }
+                    //設定外框顏色
+                    outline.effectColor = Color.red;
                 }
-                //瞳孔位移在允許範圍
                 else
                 {
-                    errorThresholdTimer = 0f;
-                    //紀錄新的瞳孔位置
-                    gazePos = newGazePos;
+                    //凝視位置取左右瞳孔位置中點
+                    Vector2 newGazePos = new Vector2(
+                        (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.x + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.x) * 0.5f,
+                        (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.y + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.y) * 0.5f);
 
-                    //設定凝視判斷的計時器，需要持續凝視超過秒數才算專注
-                    if (!isGazeHolding)
-                    {
-                        //開始倒數
-                        gazeHoldingTimer = gazeHoldingTime;
-                        isGazeHolding = true;
-                    }
+                    if (gazePos == null) gazePos = newGazePos;
                     else
                     {
-                        //倒數
-                        gazeHoldingTimer = gazeHoldingTimer - Time.deltaTime > 0f ? gazeHoldingTimer - Time.deltaTime : 0f;
-                        if(gazeHoldingTimer > 0)
+                        //瞳孔位移過大，但可能是誤差，需再判斷
+                        if (Vector2.SqrMagnitude(newGazePos - gazePos) > thresholdDistance)
                         {
-                            //設定Header文字
-                            t_header.text = "瞳孔位移過快不專心";
-                            //如果Gaze還沒持續一段時間，還不會被判斷為專注
-                            return;
+                            //Debug.Log(Vector2.SqrMagnitude(newGazePos - gazePos));
+
+                            //計時是否持續，若持續時間超過閾值，代表此位移為真
+                            if (errorThresholdTimer == 0f) errorThresholdTimer = errorThresholdTime;
+                            else
+                            {   //倒數
+                                errorThresholdTimer = errorThresholdTimer - Time.deltaTime > 0f ? errorThresholdTimer - Time.deltaTime : 0f;
+                                //確定為位移
+                                if (errorThresholdTimer == 0f)
+                                {
+                                    //重置凝視狀態
+                                    isGazeHolding = false;
+                                    //設定Header文字
+                                    t_header.text = "瞳孔位移過快不專心";
+
+                                    //紀錄新的瞳孔位置
+                                    gazePos = newGazePos;
+                                    //設定專注狀態
+                                    isFocus = false;
+                                    //設定外框顏色
+                                    outline.effectColor = Color.red;
+                                }
+                            }
+                        }
+                        //瞳孔位移在允許範圍
+                        else
+                        {
+                            errorThresholdTimer = 0f;
+                            //紀錄新的瞳孔位置
+                            gazePos = newGazePos;
+
+                            //設定凝視判斷的計時器，需要持續凝視超過秒數才算專注
+                            if (!isGazeHolding)
+                            {
+                                //開始倒數
+                                gazeHoldingTimer = gazeHoldingTime;
+                                isGazeHolding = true;
+                            }
+                            else
+                            {
+                                //倒數
+                                gazeHoldingTimer = gazeHoldingTimer - Time.deltaTime > 0f ? gazeHoldingTimer - Time.deltaTime : 0f;
+                                if (gazeHoldingTimer > 0)
+                                {
+                                    //設定Header文字
+                                    t_header.text = "瞳孔位移過快不專心";
+                                    //如果Gaze還沒持續一段時間，還不會被判斷為專注
+                                }
+                                else
+                                {
+                                    //設定專注狀態
+                                    isFocus = true;
+                                }
+                            }
                         }
                     }
                 }
             }
-#endregion  -----專注度判斷-----
 
-            //專注狀態，慢慢增加專注度
-            if (concentration < 1f) concentration += 1f / concentrationRecoveryTime * Time.deltaTime;
-            if (concentration > 1f) concentration = 1f;
+            #endregion  -----專注度判斷-----
+
+            if (isFocus)
+            {
+                //專注狀態，慢慢增加專注度
+                if (concentration < 1f) concentration += 1f / concentrationRecoveryTime * Time.deltaTime;
+                if (concentration > 1f) concentration = 1f;
+            }
+            else
+            {
+                concentration = 0f;
+            }
+            
             //設定外框顏色
             outline.effectColor = Color.Lerp(Color.red, Color.green, concentration);
             //設定Header文字

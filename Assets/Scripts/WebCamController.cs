@@ -21,7 +21,6 @@ public class WebCamController : MonoBehaviour
     void OnDestroy()
     {
         webCamTexture.Stop();
-        Debug.Log("123");
     }
 
     //IEnumerator UpdateWebcamPhoto()  // Start this Coroutine on some button click
