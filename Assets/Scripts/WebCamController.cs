@@ -5,9 +5,11 @@ using System.IO;
 
 public class WebCamController : MonoBehaviour
 {
+    public float updateInteval = 0.1f;
     public RawImage UIRawImage;
     private WebCamTexture webCamTexture;
     private byte[] photoBytes;
+    private Coroutine WebCamUpdateRouting;
 
     void Start()
     {
@@ -15,37 +17,28 @@ public class WebCamController : MonoBehaviour
         UIRawImage.texture = webCamTexture;  //set webcam image on panel
         webCamTexture.Play();
 
-        //StartCoroutine(UpdateWebcamPhoto());
+        WebCamUpdateRouting = StartCoroutine(WebCamUpdate());
     }
 
     void OnDestroy()
     {
         webCamTexture.Stop();
+
+        StopCoroutine(WebCamUpdateRouting);
+        WebCamUpdateRouting = null;
     }
 
-    //IEnumerator UpdateWebcamPhoto()  // Start this Coroutine on some button click
-    //{
-    //    while (true)
-    //    {
-    //        yield return new WaitForEndOfFrame();
-
-    //        // it's a rare case where the Unity doco is pretty clear,
-    //        // http://docs.unity3d.com/ScriptReference/WaitForEndOfFrame.html
-    //        // be sure to scroll down to the SECOND long example on that doco page 
-
-    //        Texture2D photo = new Texture2D(webCamTexture.width, webCamTexture.height);
-    //        photo.SetPixels(webCamTexture.GetPixels());
-    //        photo.Apply();
-
-    //        //Encode to a PNG
-    //        photoBytes = photo.EncodeToJPG();
-
-    //        ////Write out the jpg. Of course you have to substitute your_path for something sensible
-    //        //File.WriteAllBytes("./" + "photo.jpg", photoBytes);
-    //    }
-    //}
-
     void Update()
+    {
+        //Texture2D photo = new Texture2D(webCamTexture.width, webCamTexture.height);
+        //photo.SetPixels(webCamTexture.GetPixels());
+        //photo.Apply();
+
+        //Encode to a PNG
+        //photoBytes = photo.EncodeToJPG();
+    }
+
+    IEnumerator WebCamUpdate()
     {
         Texture2D photo = new Texture2D(webCamTexture.width, webCamTexture.height);
         photo.SetPixels(webCamTexture.GetPixels());
@@ -53,6 +46,10 @@ public class WebCamController : MonoBehaviour
 
         //Encode to a PNG
         photoBytes = photo.EncodeToJPG();
+
+        yield return new WaitForSeconds(updateInteval);
+        
+        WebCamUpdateRouting = StartCoroutine(WebCamUpdate());
     }
 
     public byte[] GetImageBytes()
