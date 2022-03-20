@@ -10,7 +10,12 @@
       "ProjectGuid": "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3",
       "DisplayName": "其他檔案",
       "ColorIndex": -1
+    },
+    "120211d4-8206-ea06-2aab-b0695fe6d87f": {
+      "ProjectGuid": "120211d4-8206-ea06-2aab-b0695fe6d87f",
+      "DisplayName": "Assembly-CSharp-firstpass",
+      "ColorIndex": 1
     }
   },
-  "NextColorIndex": 1
+  "NextColorIndex": 2
 }
