@@ -29,10 +29,8 @@ public class ConcentrationSystem : MonoBehaviour
 
     [Header("Azure Detection")]
     [SerializeField] private AzureFaceResponse azureFaceResponse = new AzureFaceResponse();
-    private float detectInterval = 0.25f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
-    private float intervalTimer = 0f;
-    //private Coroutine coroutine_LoopDetectFace;
-    private bool isDetecting = false;
+    private float detectInterval = 0.5f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
+    private Coroutine detectRouting;
 
     [Header("Gaze Detection")]
     private Vector2 gazePos;    //目前凝視位置
@@ -60,148 +58,135 @@ public class ConcentrationSystem : MonoBehaviour
 
     private void Update()
     {
-        //由公開函式設定isDetecting
-        if (isDetecting)
+        if (isFocus)
         {
-            //Azure Requese Interval，考量Azure免費方案有呼叫API頻率限制
-            intervalTimer -= Time.deltaTime;
-            if (intervalTimer <= 0f)
-            {
-                //重置倒數時間
-                intervalTimer = detectInterval;
-
-                //取得鏡頭畫面並呼叫AZURE偵測
-                byte[] imageBytes = this.GetComponent<WebCamController>().GetImageBytes();
-                if (imageBytes != null) AzureDetectImage(imageBytes);
-            }
+            //專注狀態，慢慢增加專注度
+            if (concentration < 1f) concentration += 1f / concentrationRecoveryTime * Time.deltaTime;
+            if (concentration > 1f) concentration = 1f;
+        }
+        else
+        {
+            concentration = 0f;
+        }
             
+        //設定外框顏色
+        outline.effectColor = Color.Lerp(Color.red, Color.green, concentration);
+        //設定Header文字
+        //t_header.text = concentration < 1 ? $"專心度提升中：{concentration}" : $"專心度MAX：1";
+    }
+
+    IEnumerator FocusDetect()
+    {
+        //取得鏡頭畫面並呼叫AZURE偵測
+        byte[] imageBytes = this.GetComponent<WebCamController>().GetImageBytes();
+        if (imageBytes != null) AzureDetectImage(imageBytes);
+
 
         #region -----專注度判斷-----
-            //沒有偵測到人臉
-            if (azureFaceResponse.faceList.Length == 0)
+        //沒有偵測到人臉
+        if (azureFaceResponse.faceList.Length == 0)
+        {
+            //設定Header文字
+            t_header.text = "偵測不到臉部";
+
+            //設定專注狀態
+            isFocus = false;
+        }
+        else
+        {
+            //依權重計算表情專注分數
+            float emotionValue = azureFaceResponse.faceList[0].faceAttributes.emotion.neutral * 0.9f +
+                azureFaceResponse.faceList[0].faceAttributes.emotion.happiness * 0.6f +
+                azureFaceResponse.faceList[0].faceAttributes.emotion.surprise * 0.6f +
+                azureFaceResponse.faceList[0].faceAttributes.emotion.sadness * 0.3f +
+                azureFaceResponse.faceList[0].faceAttributes.emotion.disgust * 0.2f +
+                azureFaceResponse.faceList[0].faceAttributes.emotion.anger * 0.25f +
+                azureFaceResponse.faceList[0].faceAttributes.emotion.fear * 0.3f;
+
+            //表情偵測為不專心(0.5是自己測試的數值)
+            if (emotionValue < 0.5f)
             {
                 //設定Header文字
-                t_header.text = "偵測不到臉部";
+                t_header.text = "情緒偵測為不專心";
 
                 //設定專注狀態
                 isFocus = false;
-
-                //設定外框顏色
-                outline.effectColor = Color.red;
             }
             else
             {
-                //依權重計算表情專注分數
-                float emotionValue = azureFaceResponse.faceList[0].faceAttributes.emotion.neutral * 0.9f +
-                    azureFaceResponse.faceList[0].faceAttributes.emotion.happiness * 0.6f +
-                    azureFaceResponse.faceList[0].faceAttributes.emotion.surprise * 0.6f +
-                    azureFaceResponse.faceList[0].faceAttributes.emotion.sadness * 0.3f +
-                    azureFaceResponse.faceList[0].faceAttributes.emotion.disgust * 0.2f +
-                    azureFaceResponse.faceList[0].faceAttributes.emotion.anger * 0.25f +
-                    azureFaceResponse.faceList[0].faceAttributes.emotion.fear * 0.3f;
+                //凝視位置取左右瞳孔位置中點
+                Vector2 newGazePos = new Vector2(
+                    (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.x + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.x) * 0.5f,
+                    (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.y + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.y) * 0.5f);
 
-                //表情偵測為不專心(0.5是自己測試的數值)
-                if (emotionValue < 0.5f)
-                {
-                    //設定Header文字
-                    t_header.text = "情緒偵測為不專心";
-
-                    //設定專注狀態
-                    isFocus = false;
-
-                    //設定外框顏色
-                    outline.effectColor = Color.red;
-                }
+                if (gazePos == null) gazePos = newGazePos;
                 else
                 {
-                    //凝視位置取左右瞳孔位置中點
-                    Vector2 newGazePos = new Vector2(
-                        (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.x + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.x) * 0.5f,
-                        (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.y + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.y) * 0.5f);
-
-                    if (gazePos == null) gazePos = newGazePos;
-                    else
+                    //瞳孔位移過大，但可能是誤差，需再判斷
+                    if (Vector2.SqrMagnitude(newGazePos - gazePos) > thresholdDistance)
                     {
-                        //瞳孔位移過大，但可能是誤差，需再判斷
-                        if (Vector2.SqrMagnitude(newGazePos - gazePos) > thresholdDistance)
-                        {
-                            //Debug.Log(Vector2.SqrMagnitude(newGazePos - gazePos));
-
-                            //計時是否持續，若持續時間超過閾值，代表此位移為真
-                            if (errorThresholdTimer == 0f) errorThresholdTimer = errorThresholdTime;
-                            else
-                            {   //倒數
-                                errorThresholdTimer = errorThresholdTimer - Time.deltaTime > 0f ? errorThresholdTimer - Time.deltaTime : 0f;
-                                //確定為位移
-                                if (errorThresholdTimer == 0f)
-                                {
-                                    //重置凝視狀態
-                                    isGazeHolding = false;
-                                    //設定Header文字
-                                    t_header.text = "瞳孔位移過快不專心";
-
-                                    //紀錄新的瞳孔位置
-                                    gazePos = newGazePos;
-                                    //設定專注狀態
-                                    isFocus = false;
-                                    //設定外框顏色
-                                    outline.effectColor = Color.red;
-                                }
+                        //計時是否持續，若持續時間超過閾值，代表此位移為真
+                        if (errorThresholdTimer == 0f) errorThresholdTimer = Time.time + errorThresholdTime;
+                        else
+                        {   
+                            //確定為位移
+                            if (Time.time >= errorThresholdTimer)
+                            {
+                                //重置errorThresholdTimer
+                                errorThresholdTimer = 0f;
+                                //重置凝視狀態
+                                isGazeHolding = false;
+                                //設定Header文字
+                                t_header.text = "瞳孔位移過快不專心";
+                                //紀錄新的瞳孔位置
+                                gazePos = newGazePos;
+                                //設定專注狀態
+                                isFocus = false;
                             }
                         }
-                        //瞳孔位移在允許範圍
+                    }
+                    //瞳孔位移在允許範圍
+                    else
+                    {
+                        //重置errorThresholdTimer
+                        errorThresholdTimer = 0f;
+                        //紀錄新的瞳孔位置
+                        gazePos = newGazePos;
+
+                        //設定凝視判斷的計時器，需要持續凝視超過秒數才算專注
+                        if (!isGazeHolding)
+                        {
+                            //開始倒數
+                            gazeHoldingTimer = Time.time + gazeHoldingTime;
+                            isGazeHolding = true;
+                        }
                         else
                         {
-                            errorThresholdTimer = 0f;
-                            //紀錄新的瞳孔位置
-                            gazePos = newGazePos;
-
-                            //設定凝視判斷的計時器，需要持續凝視超過秒數才算專注
-                            if (!isGazeHolding)
+                            //如果Gaze還沒持續一段時間，還不會被判斷為專注
+                            if (Time.time < gazeHoldingTimer)
                             {
-                                //開始倒數
-                                gazeHoldingTimer = gazeHoldingTime;
-                                isGazeHolding = true;
+                                //設定Header文字
+                                t_header.text = $"瞳孔位移過快不專心{gazeHoldingTimer}";
                             }
                             else
                             {
-                                //倒數
-                                gazeHoldingTimer = gazeHoldingTimer - Time.deltaTime > 0f ? gazeHoldingTimer - Time.deltaTime : 0f;
-                                if (gazeHoldingTimer > 0)
-                                {
-                                    //設定Header文字
-                                    t_header.text = "瞳孔位移過快不專心";
-                                    //如果Gaze還沒持續一段時間，還不會被判斷為專注
-                                }
-                                else
-                                {
-                                    //設定專注狀態
-                                    isFocus = true;
-                                }
+                                //設定專注狀態
+                                isFocus = true;
+                                t_header.text = "";
                             }
                         }
                     }
                 }
             }
-
-            #endregion  -----專注度判斷-----
-
-            if (isFocus)
-            {
-                //專注狀態，慢慢增加專注度
-                if (concentration < 1f) concentration += 1f / concentrationRecoveryTime * Time.deltaTime;
-                if (concentration > 1f) concentration = 1f;
-            }
-            else
-            {
-                concentration = 0f;
-            }
-            
-            //設定外框顏色
-            outline.effectColor = Color.Lerp(Color.red, Color.green, concentration);
-            //設定Header文字
-            t_header.text = concentration < 1 ? $"專心度提升中：{concentration}" : $"專心度MAX：1";
         }
+
+        #endregion  -----專注度判斷-----
+
+        //Azure Requese Interval，考量Azure免費方案有呼叫API頻率限制
+        yield return new WaitForSeconds(detectInterval);
+
+        //下一次運算
+        detectRouting = StartCoroutine(FocusDetect());
     }
 
     public void FocusDetectionStart()
@@ -209,7 +194,7 @@ public class ConcentrationSystem : MonoBehaviour
         //開啟介面
         faceDetectUI.SetActive(true);
         //開始執行判斷
-        isDetecting = true;
+        detectRouting = StartCoroutine(FocusDetect());
     }
 
     public void FocusDetectionReset()
@@ -217,9 +202,13 @@ public class ConcentrationSystem : MonoBehaviour
         //關閉介面
         faceDetectUI.SetActive(false);
         //停止判斷
-        isDetecting = false;
-        //專注度歸零
-        concentration = 0f;
+        if(detectRouting!=null)
+        {
+            StopCoroutine(detectRouting);
+            detectRouting = null;
+        }
+        //設定專注狀態
+        isFocus = false;
     }
 
     private async void AzureDetectImage(byte[] imageBytes)

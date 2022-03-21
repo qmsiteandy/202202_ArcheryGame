@@ -3063,6 +3063,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   azureFaceResponse:
     faceList: []
+  isFocus: 0
   concentration: 1
   concentrationRecoveryTime: 3
   faceDetectUI: {fileID: 8499349958937223039}
@@ -3082,6 +3083,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb53b898e24de484fa7d714ea671c847, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  updateInteval: 0.1
   UIRawImage: {fileID: 8499349959464453768}
 --- !u!1 &8499349959846082373
 GameObject:
@@ -3825,7 +3827,7 @@ MonoBehaviour:
   minmumHor: -60
   maxmumHor: 60
   noise: 1
-  range: {x: 7.5, y: 4.5}
+  range: {x: 4.5, y: 2.5}
   concentrationSystem: {fileID: 8499349959829528191}
 --- !u!114 &8499349960647651093
 MonoBehaviour:

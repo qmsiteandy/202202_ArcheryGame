@@ -24,11 +24,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        
-    }
-
     public void ChooseSequenceMode(string _mode)
     {
         //先普通模式再專注模式
@@ -50,5 +45,10 @@ public class GameManager : MonoBehaviour
             SceneManager.LoadScene(sceneSeq[sceneindex]);
             sceneindex += 1;
         }
+    }
+
+    public void ReloadScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

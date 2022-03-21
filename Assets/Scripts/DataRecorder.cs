@@ -6,7 +6,11 @@ using System.IO;
 
 public class DataRecorder : MonoBehaviour
 {
+	private float levelStartTime;
+
 	public ConcentrationSystem concentrationSystem;
+	public ShootController shootController;
+	private bool[] archeryProcess = new bool[50000];
 	private bool[] isFocus = new bool[50000];
 	private float[] concentration = new float[50000];
 
@@ -31,12 +35,14 @@ public class DataRecorder : MonoBehaviour
 	private void Start()
 	{
 		MindwaveManager.Instance.Controller.OnUpdateMindwaveData += OnUpdateMindwaveData;
+
+		levelStartTime = Time.time;
 	}
 
 	public void OnUpdateMindwaveData(MindwaveDataModel _Data)
 	{
 		eSenseData[dataCount] = _Data.eSense;
-		gameTime[dataCount] = Time.time;
+		gameTime[dataCount] = Time.time - levelStartTime;
 		datetime[dataCount] = DateTime.Now.ToString("yyyyMMdd-HHmmss");
 
 		//紀錄原始數值
@@ -59,9 +65,12 @@ public class DataRecorder : MonoBehaviour
 		//lowGamma[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.LowGamma, _Data.eegPower.lowGamma);
 		//highGamma[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.HighGamma, _Data.eegPower.highGamma);
 
-		Debug.Log(delta[dataCount]);
-		isFocus[dataCount] = concentrationSystem.isFocus;
-		concentration[dataCount] = concentrationSystem.concentration;
+		archeryProcess[dataCount] = shootController.isArcheryProcess;
+        if (concentrationSystem != null)
+        {
+			isFocus[dataCount] = concentrationSystem.isFocus;
+			concentration[dataCount] = concentrationSystem.concentration;
+		}
 
 		dataCount += 1;
 	}
@@ -73,13 +82,13 @@ public class DataRecorder : MonoBehaviour
 
 	public void WriteCsv()
 	{
-		string path = $"./data_{DateTime.Now.ToString("yyyyMMdd - HHmm")}.csv";
+		string path = $"./data_{DateTime.Now.ToString("yyyyMMdd-HHmm")}.csv";
 
 		if (!File.Exists(path)) File.Create(path).Dispose();
 
 		using (StreamWriter stream = new StreamWriter(path))
 		{
-			stream.WriteLine("gameTime,datetime,mw_attention,mw_meditation,Delta,Theta,Low Alpha,High Alpha,Low Beta,High Beta,Low Gamma,High Gamma,isFocus,sys_concentration");
+			stream.WriteLine("gameTime,datetime,mw_attention,mw_meditation,Delta,Theta,Low Alpha,High Alpha,Low Beta,High Beta,Low Gamma,High Gamma,sys_archeryProcess,sys_isFocus,sys_concentration");
 
 			for (int i = 0; i < dataCount; ++i)
 			{
@@ -95,6 +104,7 @@ public class DataRecorder : MonoBehaviour
 					 + "," + highBeta[i]
 					 + "," + lowGamma[i]
 					 + "," + highGamma[i]
+					 + "," + archeryProcess[i]
 					 + "," + isFocus[i]
 					 + "," + concentration[i]);
 			}
