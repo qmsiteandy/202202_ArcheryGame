@@ -6,7 +6,8 @@ using UnityEngine.UI;
 public class ShootRecorder : MonoBehaviour
 {
     public int score = 0;   //分數
-    public int arrow_count = 10;   //箭的數量
+    public int arrow_init_count = 10;   //箭的數量
+    public int arrow_count = 0;
 
     public Text text_score;
     public Transform arrowsFolder;
@@ -41,13 +42,14 @@ public class ShootRecorder : MonoBehaviour
     public void Reset()
     {
         score = 0;
-        arrow_count = 10;
+        arrow_count = arrow_init_count;
 
         text_score.text = "0";
 
         for (int i=0;i < arrowsFolder.childCount; i++)
         {
-            arrowsFolder.GetChild(i).gameObject.SetActive(true);
+            if(i < arrow_count) arrowsFolder.GetChild(i).gameObject.SetActive(true);
+            else arrowsFolder.GetChild(i).gameObject.SetActive(false);
         }
     }
 }

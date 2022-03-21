@@ -13,6 +13,7 @@ public class ShootController : MonoBehaviour
     public Animator animator;
     private enum status { idle, standBy, drawing, handling };
     private status playerStatus = status.idle;
+    public bool isArcheryProcess { get { return playerStatus == status.drawing || playerStatus == status.handling; } }
 
     [Header("Shoot")]
     public ShootRecorder shootRecorder;
