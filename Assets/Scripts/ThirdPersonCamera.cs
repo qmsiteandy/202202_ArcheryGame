@@ -33,8 +33,6 @@ public class ThirdPersonCamera : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        Cursor.visible = false;
-
         //判斷是否有專注系統
         isConcentretionSystemActive = concentrationSystem.gameObject.activeInHierarchy;
     }

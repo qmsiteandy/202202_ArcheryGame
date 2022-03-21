@@ -3065,7 +3065,7 @@ MonoBehaviour:
     faceList: []
   isFocus: 0
   concentration: 1
-  concentrationRecoveryTime: 3
+  concentrationRecoveryTime: 5
   faceDetectUI: {fileID: 8499349958937223039}
   t_header: {fileID: 8499349959439328759}
   t_console1: {fileID: 8499349960012062207}
@@ -3083,7 +3083,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb53b898e24de484fa7d714ea671c847, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateInteval: 0.1
+  updatePhotoBytes: 1
+  updateInteval: 0.25
   UIRawImage: {fileID: 8499349959464453768}
 --- !u!1 &8499349959846082373
 GameObject:

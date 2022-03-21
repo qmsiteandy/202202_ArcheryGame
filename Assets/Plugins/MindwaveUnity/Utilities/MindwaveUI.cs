@@ -62,7 +62,7 @@ public class MindwaveUI : MonoBehaviour
 			GUILayout.BeginHorizontal();
 			{
 				DrawControllerGUI();
-				DrawCalibratorGUI();
+				//DrawCalibratorGUI();
 			}
 			GUILayout.EndHorizontal();
 		}

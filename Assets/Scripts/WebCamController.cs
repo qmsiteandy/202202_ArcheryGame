@@ -5,6 +5,7 @@ using System.IO;
 
 public class WebCamController : MonoBehaviour
 {
+    public bool updatePhotoBytes = false;
     public float updateInteval = 0.1f;
     public RawImage UIRawImage;
     private WebCamTexture webCamTexture;
@@ -17,25 +18,15 @@ public class WebCamController : MonoBehaviour
         UIRawImage.texture = webCamTexture;  //set webcam image on panel
         webCamTexture.Play();
 
-        WebCamUpdateRouting = StartCoroutine(WebCamUpdate());
+        if (updatePhotoBytes) WebCamUpdateRouting = StartCoroutine(WebCamUpdate());
     }
 
     void OnDestroy()
     {
         webCamTexture.Stop();
 
-        StopCoroutine(WebCamUpdateRouting);
+        if (WebCamUpdateRouting != null) StopCoroutine(WebCamUpdateRouting);
         WebCamUpdateRouting = null;
-    }
-
-    void Update()
-    {
-        //Texture2D photo = new Texture2D(webCamTexture.width, webCamTexture.height);
-        //photo.SetPixels(webCamTexture.GetPixels());
-        //photo.Apply();
-
-        //Encode to a PNG
-        //photoBytes = photo.EncodeToJPG();
     }
 
     IEnumerator WebCamUpdate()

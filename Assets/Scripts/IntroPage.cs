@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class IntroPage : MonoBehaviour
 {
-    // Update is called once per frame
+    public MindwaveController mindwaveController;
+    public GameObject button_start, text_waitMindwave;
+    
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            this.gameObject.SetActive(false);
-            this.enabled = false;   
+        if (mindwaveController.gameObject.activeInHierarchy) {
+            button_start.SetActive(mindwaveController.IsConnected);
+            text_waitMindwave.SetActive(!mindwaveController.IsConnected);
         }
     }
 }
