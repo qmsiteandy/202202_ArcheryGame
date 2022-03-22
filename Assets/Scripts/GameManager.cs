@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour
     private int sceneindex = 0;
     private string[] sceneSeq;
 
+    public string mode = "";
+
     void Start()
     {
         if (!isDontDestroy)
@@ -29,11 +31,13 @@ public class GameManager : MonoBehaviour
         //先普通模式再專注模式
         if(_mode == "A")
         {
+            mode = _mode;
             sceneSeq = new string[] { "_1_IntroScene", "_2_SceneNormal", "_3_IntroConcentration", "_4_SceneConcentration", "_5_EndSenen" };
         }
         //先專注模式再普通模式
         else if(_mode == "B")
         {
+            mode = _mode;
             sceneSeq = new string[] { "_1_IntroScene", "_3_IntroConcentration", "_4_SceneConcentration", "_2_SceneNormal", "_5_EndSenen" };
         }
     }

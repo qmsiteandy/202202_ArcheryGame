@@ -6,7 +6,10 @@ using System.IO;
 
 public class DataRecorder : MonoBehaviour
 {
-	private float levelStartTime;
+	private float mwConnectedTime = 0f;
+
+	private string testMode = "";
+	private string testSys = "";
 
 	public ConcentrationSystem concentrationSystem;
 	public ShootController shootController;
@@ -36,13 +39,18 @@ public class DataRecorder : MonoBehaviour
 	{
 		MindwaveManager.Instance.Controller.OnUpdateMindwaveData += OnUpdateMindwaveData;
 
-		levelStartTime = Time.time;
+		testMode = FindObjectOfType<GameManager>().mode;
+		testMode = testMode == "" ? "noMode" : testMode;
+
+		testSys = concentrationSystem == null ? "noSys" : "withSys";
 	}
 
 	public void OnUpdateMindwaveData(MindwaveDataModel _Data)
 	{
+		if (mwConnectedTime == 0f) mwConnectedTime = Time.time;
+
 		eSenseData[dataCount] = _Data.eSense;
-		gameTime[dataCount] = Time.time - levelStartTime;
+		gameTime[dataCount] = Time.time - mwConnectedTime;
 		datetime[dataCount] = DateTime.Now.ToString("yyyyMMdd-HHmmss");
 
 		//紀錄原始數值
@@ -82,7 +90,7 @@ public class DataRecorder : MonoBehaviour
 
 	public void WriteCsv()
 	{
-		string path = $"./data_{DateTime.Now.ToString("yyyyMMdd-HHmm")}.csv";
+		string path = $"./data_{testMode}_{DateTime.Now.ToString("yyyyMMdd-HHmm")}_{testSys}.csv";
 
 		if (!File.Exists(path)) File.Create(path).Dispose();
 

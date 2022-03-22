@@ -175,20 +175,20 @@ public class MindwaveUI : MonoBehaviour
 				DrawData("Meditation", m_MindwaveData.eSense.meditation);
 				DrawSpace();
 
-				GUILayout.Box("Brain Waves");
-				DrawData("Delta", m_MindwaveData.eegPower.delta);
-				DrawData("Theta", m_MindwaveData.eegPower.theta);
-				DrawData("Low Alpha", m_MindwaveData.eegPower.lowAlpha);
-				DrawData("High Alpha", m_MindwaveData.eegPower.highAlpha);
-				DrawData("Low Beta", m_MindwaveData.eegPower.lowBeta);
-				DrawData("High Beta", m_MindwaveData.eegPower.highBeta);
-				DrawData("Low Gamma", m_MindwaveData.eegPower.lowGamma);
-				DrawData("High Gamma", m_MindwaveData.eegPower.highGamma);
-				DrawSpace();
+				//GUILayout.Box("Brain Waves");
+				//DrawData("Delta", m_MindwaveData.eegPower.delta);
+				//DrawData("Theta", m_MindwaveData.eegPower.theta);
+				//DrawData("Low Alpha", m_MindwaveData.eegPower.lowAlpha);
+				//DrawData("High Alpha", m_MindwaveData.eegPower.highAlpha);
+				//DrawData("Low Beta", m_MindwaveData.eegPower.lowBeta);
+				//DrawData("High Beta", m_MindwaveData.eegPower.highBeta);
+				//DrawData("Low Gamma", m_MindwaveData.eegPower.lowGamma);
+				//DrawData("High Gamma", m_MindwaveData.eegPower.highGamma);
+				//DrawSpace();
 
-				GUILayout.Box("Others");
-				DrawData("Blink strength", m_BlinkStrength);
-				DrawData("Raw EEG", m_EEGValue);
+				//GUILayout.Box("Others");
+				//DrawData("Blink strength", m_BlinkStrength);
+				//DrawData("Raw EEG", m_EEGValue);
 			}
 			GUILayout.EndVertical();
 
