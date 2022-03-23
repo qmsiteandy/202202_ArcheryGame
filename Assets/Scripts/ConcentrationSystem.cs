@@ -29,7 +29,8 @@ public class ConcentrationSystem : MonoBehaviour
 
     [Header("Azure Detection")]
     [SerializeField] private AzureFaceResponse azureFaceResponse = new AzureFaceResponse();
-    private float detectInterval = 0.5f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
+    private float detectInterval = 0.25f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
+    private float detectIntervalTimer = 0f;
     private Coroutine detectRouting;
 
     [Header("Gaze Detection")]
@@ -42,9 +43,11 @@ public class ConcentrationSystem : MonoBehaviour
     private bool isGazeHolding = false; //偵測是否判斷為凝視狀態
 
     [Header("Concentration Detect")]
+    private bool isDetecting = false;
     public bool isFocus = false;
     [Range(0, 1)] public float concentration = 0f;    //專注度
     public float concentrationRecoveryTime = 5f;    //從0->1慢慢增加的時間
+    private float concentrationUpdateTime = 0f;
 
     [Header("UI")]
     public GameObject faceDetectUI;
@@ -58,6 +61,14 @@ public class ConcentrationSystem : MonoBehaviour
 
     private void Update()
     {
+        //每N秒呼叫一次API，等API回傳後立即運算專注度
+        if(isDetecting && detectIntervalTimer < Time.time)
+        {
+            detectIntervalTimer = Time.time + detectInterval;
+            StartCoroutine(FocusDetect());
+        }
+        
+
         if (isFocus)
         {
             //專注狀態，慢慢增加專注度
@@ -77,185 +88,261 @@ public class ConcentrationSystem : MonoBehaviour
 
     IEnumerator FocusDetect()
     {
+        //用來計算專注度更新週期
+        float FocusDetectStartTime = Time.time;
+
         //取得鏡頭畫面並呼叫AZURE偵測
         byte[] imageBytes = this.GetComponent<WebCamController>().GetImageBytes();
-        if (imageBytes != null) AzureDetectImage(imageBytes);
-
-
-        #region -----專注度判斷-----
-        //沒有偵測到人臉
-        if (azureFaceResponse.faceList.Length == 0)
+        if (imageBytes == null)
         {
-            //設定Header文字
-            t_header.text = "偵測不到臉部";
-
-            //設定專注狀態
-            isFocus = false;
+            Debug.LogError("imageBytes is null");
         }
         else
         {
-            //依權重計算表情專注分數
-            float emotionValue = azureFaceResponse.faceList[0].faceAttributes.emotion.neutral * 0.9f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.happiness * 0.6f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.surprise * 0.6f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.sadness * 0.3f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.disgust * 0.2f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.anger * 0.25f +
-                azureFaceResponse.faceList[0].faceAttributes.emotion.fear * 0.3f;
+            #region -----呼叫Face API-----
 
-            //表情偵測為不專心(0.5是自己測試的數值)
-            if (emotionValue < 0.5f)
+            //取得輪流使用的endpoint&secret
+            string[] faceApiAndSecret = GetFaceApiAndSecret();
+
+            WWWForm webForm = new WWWForm();
+            using (UnityWebRequest www = UnityWebRequest.Post(faceApiAndSecret[0], webForm))
             {
-                //設定Header文字
-                t_header.text = "情緒偵測為不專心";
+                www.SetRequestHeader("Ocp-Apim-Subscription-Key", faceApiAndSecret[1]);
+                www.SetRequestHeader("Content-Type", "application/octet-stream");
+                www.uploadHandler.contentType = "application/json";
+                www.uploadHandler = new UploadHandlerRaw(imageBytes);
+                www.downloadHandler = new DownloadHandlerBuffer();
 
-                //設定專注狀態
-                isFocus = false;
+                www.SendWebRequest();
+
+                while (!www.isDone)
+                    yield return null;
+
+                if (www.isNetworkError)
+                {
+                    Debug.LogError($"statue:{www.responseCode} error:{www.error}");
+                    ShowAzureError(www.responseCode, www.error);
+                }
+
+                if (www.isDone)
+                {
+                    if (www.responseCode / 100 == 2)
+                    {
+                        string data = System.Text.Encoding.UTF8.GetString(www.downloadHandler.data);
+                        //Debug.Log($"statue:{www.responseCode} data:{data}");
+
+                        azureFaceResponse = JsonUtility.FromJson<AzureFaceResponse>("{\"faceList\":" + data + "}");
+
+                        ShowAzureResponse(azureFaceResponse);
+                    }
+                    else
+                    {
+                        Debug.LogError($"statue:{www.responseCode} error:{www.error}");
+                        ShowAzureError(www.responseCode, www.error);
+
+                        azureFaceResponse = null;
+                    }
+                }
             }
-            else
-            {
-                //凝視位置取左右瞳孔位置中點
-                Vector2 newGazePos = new Vector2(
-                    (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.x + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.x) * 0.5f,
-                    (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.y + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.y) * 0.5f);
+            #endregion -----呼叫Face API-----
 
-                if (gazePos == null) gazePos = newGazePos;
+            #region -----專注度判斷-----
+
+            if (azureFaceResponse != null)
+            { 
+                //沒有偵測到人臉
+                if (azureFaceResponse.faceList.Length == 0)
+                {
+                    //設定Header文字
+                    t_header.text = "偵測不到臉部";
+
+                    //設定專注狀態
+                    isFocus = false;
+                }
                 else
                 {
-                    //瞳孔位移過大，但可能是誤差，需再判斷
-                    if (Vector2.SqrMagnitude(newGazePos - gazePos) > thresholdDistance)
+                    //依權重計算表情專注分數
+                    float emotionValue = azureFaceResponse.faceList[0].faceAttributes.emotion.neutral * 0.9f +
+                        azureFaceResponse.faceList[0].faceAttributes.emotion.happiness * 0.6f +
+                        azureFaceResponse.faceList[0].faceAttributes.emotion.surprise * 0.6f +
+                        azureFaceResponse.faceList[0].faceAttributes.emotion.sadness * 0.3f +
+                        azureFaceResponse.faceList[0].faceAttributes.emotion.disgust * 0.2f +
+                        azureFaceResponse.faceList[0].faceAttributes.emotion.anger * 0.25f +
+                        azureFaceResponse.faceList[0].faceAttributes.emotion.fear * 0.3f;
+
+                    //表情偵測為不專心(0.5是自己測試的數值)
+                    if (emotionValue < 0.5f)
                     {
-                        //計時是否持續，若持續時間超過閾值，代表此位移為真
-                        if (errorThresholdTimer == 0f) errorThresholdTimer = Time.time + errorThresholdTime;
+                        //設定Header文字
+                        t_header.text = "情緒偵測為不專心";
+
+                        //設定專注狀態
+                        isFocus = false;
+                    }
+                    else
+                    {
+                        //凝視位置取左右瞳孔位置中點
+                        Vector2 newGazePos = new Vector2(
+                            (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.x + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.x) * 0.5f,
+                            (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.y + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.y) * 0.5f);
+
+                        if (gazePos == null) gazePos = newGazePos;
                         else
-                        {   
-                            //確定為位移
-                            if (Time.time >= errorThresholdTimer)
+                        {
+                            //瞳孔位移過大，但可能是誤差，需再判斷
+                            if (Vector2.SqrMagnitude(newGazePos - gazePos) > thresholdDistance)
+                            {
+                                //計時是否持續，若持續時間超過閾值，代表此位移為真
+                                if (errorThresholdTimer == 0f) errorThresholdTimer = Time.time + errorThresholdTime;
+                                else
+                                {
+                                    //確定為位移
+                                    if (Time.time >= errorThresholdTimer)
+                                    {
+                                        //重置errorThresholdTimer
+                                        errorThresholdTimer = 0f;
+                                        //重置凝視狀態
+                                        isGazeHolding = false;
+                                        //設定Header文字
+                                        t_header.text = "瞳孔位移過快不專心";
+                                        //紀錄新的瞳孔位置
+                                        gazePos = newGazePos;
+                                        //設定專注狀態
+                                        isFocus = false;
+                                    }
+                                }
+                            }
+                            //瞳孔位移在允許範圍
+                            else
                             {
                                 //重置errorThresholdTimer
                                 errorThresholdTimer = 0f;
-                                //重置凝視狀態
-                                isGazeHolding = false;
-                                //設定Header文字
-                                t_header.text = "瞳孔位移過快不專心";
                                 //紀錄新的瞳孔位置
                                 gazePos = newGazePos;
-                                //設定專注狀態
-                                isFocus = false;
-                            }
-                        }
-                    }
-                    //瞳孔位移在允許範圍
-                    else
-                    {
-                        //重置errorThresholdTimer
-                        errorThresholdTimer = 0f;
-                        //紀錄新的瞳孔位置
-                        gazePos = newGazePos;
 
-                        //設定凝視判斷的計時器，需要持續凝視超過秒數才算專注
-                        if (!isGazeHolding)
-                        {
-                            //開始倒數
-                            gazeHoldingTimer = Time.time + gazeHoldingTime;
-                            isGazeHolding = true;
-                        }
-                        else
-                        {
-                            //如果Gaze還沒持續一段時間，還不會被判斷為專注
-                            if (Time.time < gazeHoldingTimer)
-                            {
-                                //設定Header文字
-                                t_header.text = $"瞳孔位移過快不專心{gazeHoldingTimer}";
-                            }
-                            else
-                            {
-                                //設定專注狀態
-                                isFocus = true;
-                                t_header.text = "";
+                                //設定凝視判斷的計時器，需要持續凝視超過秒數才算專注
+                                if (!isGazeHolding)
+                                {
+                                    //開始倒數
+                                    gazeHoldingTimer = Time.time + gazeHoldingTime;
+                                    isGazeHolding = true;
+                                }
+                                else
+                                {
+                                    //如果Gaze還沒持續一段時間，還不會被判斷為專注
+                                    if (Time.time < gazeHoldingTimer)
+                                    {
+                                        //設定Header文字
+                                        t_header.text = $"瞳孔位移過快不專心{gazeHoldingTimer}";
+                                    }
+                                    else
+                                    {
+                                        //設定專注狀態
+                                        isFocus = true;
+                                        t_header.text = "";
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+
+            #endregion  -----專注度判斷-----
         }
 
-        #endregion  -----專注度判斷-----
-
         //Azure Requese Interval，考量Azure免費方案有呼叫API頻率限制
-        yield return new WaitForSeconds(detectInterval);
+        //yield return new WaitForSeconds(detectInterval);
 
-        //下一次運算
-        detectRouting = StartCoroutine(FocusDetect());
+        //Debug.Log($"此次專注判斷耗時 { Time.time - FocusDetectStartTime} 秒");
+
+        if(concentrationUpdateTime != 0f)
+        {
+            Debug.Log($"專注度更新時間 { Time.time - FocusDetectStartTime} 秒");
+        }
+        concentrationUpdateTime = Time.time;
+
+
+        // //下一次運算
+        // detectRouting = StartCoroutine(FocusDetect());
     }
 
     public void FocusDetectionStart()
     {
         //開啟介面
         faceDetectUI.SetActive(true);
-        //開始執行判斷
-        detectRouting = StartCoroutine(FocusDetect());
+        // //開始執行判斷
+        // detectRouting = StartCoroutine(FocusDetect());
+
+        isDetecting = true;
     }
 
     public void FocusDetectionReset()
     {
         //關閉介面
         faceDetectUI.SetActive(false);
-        //停止判斷
-        if(detectRouting!=null)
-        {
-            StopCoroutine(detectRouting);
-            detectRouting = null;
-        }
+        // //停止判斷
+        // if (detectRouting != null)
+        // {
+        //     StopCoroutine(detectRouting);
+        //     detectRouting = null;
+        // }
+        isDetecting = false;
         //設定專注狀態
         isFocus = false;
     }
 
-    private async void AzureDetectImage(byte[] imageBytes)
-    {
-        WWWForm webForm = new WWWForm();
+    //private async Task<AzureFaceResponse> AzureDetectImage(byte[] imageBytes)
+    //{
+    //    WWWForm webForm = new WWWForm();
 
-        //取得輪流使用的endpoint&secret
-        string[] faceApiAndSecret = GetFaceApiAndSecret();
+    //    //取得輪流使用的endpoint&secret
+    //    string[] faceApiAndSecret = GetFaceApiAndSecret();
 
-        using (UnityWebRequest www = UnityWebRequest.Post(faceApiAndSecret[0], webForm))
-        {
-            www.SetRequestHeader("Ocp-Apim-Subscription-Key", faceApiAndSecret[1]);
-            www.SetRequestHeader("Content-Type", "application/octet-stream");
-            www.uploadHandler.contentType = "application/json";
-            www.uploadHandler = new UploadHandlerRaw(imageBytes);
-            www.downloadHandler = new DownloadHandlerBuffer();
+    //    using (UnityWebRequest www = UnityWebRequest.Post(faceApiAndSecret[0], webForm))
+    //    {
+    //        www.SetRequestHeader("Ocp-Apim-Subscription-Key", faceApiAndSecret[1]);
+    //        www.SetRequestHeader("Content-Type", "application/octet-stream");
+    //        www.uploadHandler.contentType = "application/json";
+    //        www.uploadHandler = new UploadHandlerRaw(imageBytes);
+    //        www.downloadHandler = new DownloadHandlerBuffer();
 
-            www.SendWebRequest();
+    //        www.SendWebRequest();
 
-            while (!www.isDone)
-                await Task.Yield();
+    //        while (!www.isDone)
+    //            await Task.Yield();
 
-            if (www.isNetworkError)
-            {
-                Debug.LogError($"statue:{www.responseCode} error:{www.error}");
-                ShowAzureError(www.responseCode, www.error);
-            }
+    //        if (www.isNetworkError)
+    //        {
+    //            Debug.LogError($"statue:{www.responseCode} error:{www.error}");
+    //            ShowAzureError(www.responseCode, www.error);
+    //        }
 
-            if (www.isDone)
-            {
-                if(www.responseCode / 100 == 2)
-                {
-                    string data = System.Text.Encoding.UTF8.GetString(www.downloadHandler.data);
-                    Debug.Log($"statue:{www.responseCode} data:{data}");
+    //        AzureFaceResponse azureFaceResponse = null;
 
-                    azureFaceResponse = JsonUtility.FromJson<AzureFaceResponse>("{\"faceList\":" + data + "}");
+    //        if (www.isDone)
+    //        {
+    //            if(www.responseCode / 100 == 2)
+    //            {
+    //                string data = System.Text.Encoding.UTF8.GetString(www.downloadHandler.data);
+    //                Debug.Log($"statue:{www.responseCode} data:{data}");
 
-                    ShowAzureResponse(azureFaceResponse);
-                }
-                else
-                {
-                    Debug.LogError($"statue:{www.responseCode} error:{www.error}");
-                    ShowAzureError(www.responseCode, www.error);
-                }
-            }
-        }
-    }
+    //                azureFaceResponse = JsonUtility.FromJson<AzureFaceResponse>("{\"faceList\":" + data + "}");
+
+    //                ShowAzureResponse(azureFaceResponse);
+
+    //                return (azureFaceResponse);
+    //            }
+    //            else
+    //            {
+    //                Debug.LogError($"statue:{www.responseCode} error:{www.error}");
+    //                ShowAzureError(www.responseCode, www.error);
+    //            }
+    //        }
+
+    //        return azureFaceResponse;
+    //    }
+    //}
 
     private void ShowAzureResponse(AzureFaceResponse azureFaceResponse)
     {
