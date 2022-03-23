@@ -11,8 +11,8 @@ public class ShootController : MonoBehaviour
 
     [Header("State")]
     public Animator animator;
-    private enum status { idle, standBy, drawing, handling };
-    private status playerStatus = status.idle;
+    public enum status { idle, standBy, drawing, handling };
+    public status playerStatus = status.idle;
     public bool isArcheryProcess { get { return playerStatus == status.drawing || playerStatus == status.handling; } }
 
     [Header("Shoot")]
@@ -81,6 +81,7 @@ public class ShootController : MonoBehaviour
             {
                 if (playerStatus == status.handling)
                 {
+
                     //設定Animator
                     animator.SetTrigger("Shoot");
                     //播放射出音效

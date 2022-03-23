@@ -203,6 +203,11 @@ PrefabInstance:
       propertyPath: shootRecorder
       value: 
       objectReference: {fileID: 537440578}
+    - target: {fileID: 8499349960647651094, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: shootSpeed
+      value: 40
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0f733eddbc9e166459d46a2bb7c62f78, type: 3}
 --- !u!114 &181528334 stripped

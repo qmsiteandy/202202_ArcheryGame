@@ -31,7 +31,6 @@ public class ConcentrationSystem : MonoBehaviour
     [SerializeField] private AzureFaceResponse azureFaceResponse = new AzureFaceResponse();
     private float detectInterval = 0.25f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
     private float detectIntervalTimer = 0f;
-    private Coroutine detectRouting;
 
     [Header("Gaze Detection")]
     private Vector2 gazePos;    //目前凝視位置
@@ -43,7 +42,6 @@ public class ConcentrationSystem : MonoBehaviour
     private bool isGazeHolding = false; //偵測是否判斷為凝視狀態
 
     [Header("Concentration Detect")]
-    private bool isDetecting = false;
     public bool isFocus = false;
     [Range(0, 1)] public float concentration = 0f;    //專注度
     public float concentrationRecoveryTime = 5f;    //從0->1慢慢增加的時間
@@ -54,6 +52,9 @@ public class ConcentrationSystem : MonoBehaviour
     public Text t_header, t_console1, t_console2;
     public Outline outline;
 
+    [Header("Player")]
+    public ShootController shootController;
+
     private void Start()
     {
         FocusDetectionReset();
@@ -62,14 +63,14 @@ public class ConcentrationSystem : MonoBehaviour
     private void Update()
     {
         //每N秒呼叫一次API，等API回傳後立即運算專注度
-        if(isDetecting && detectIntervalTimer < Time.time)
+        if(shootController.isArcheryProcess && detectIntervalTimer < Time.time)
         {
             detectIntervalTimer = Time.time + detectInterval;
             StartCoroutine(FocusDetect());
         }
-        
 
-        if (isFocus)
+
+        if (shootController.isArcheryProcess && isFocus)
         {
             //專注狀態，慢慢增加專注度
             if (concentration < 1f) concentration += 1f / concentrationRecoveryTime * Time.deltaTime;
@@ -258,7 +259,7 @@ public class ConcentrationSystem : MonoBehaviour
 
         if(concentrationUpdateTime != 0f)
         {
-            Debug.Log($"專注度更新時間 { Time.time - FocusDetectStartTime} 秒");
+            //Debug.Log($"專注度更新時間 { Time.time - FocusDetectStartTime} 秒");
         }
         concentrationUpdateTime = Time.time;
 
@@ -273,8 +274,6 @@ public class ConcentrationSystem : MonoBehaviour
         faceDetectUI.SetActive(true);
         // //開始執行判斷
         // detectRouting = StartCoroutine(FocusDetect());
-
-        isDetecting = true;
     }
 
     public void FocusDetectionReset()
@@ -287,7 +286,7 @@ public class ConcentrationSystem : MonoBehaviour
         //     StopCoroutine(detectRouting);
         //     detectRouting = null;
         // }
-        isDetecting = false;
+
         //設定專注狀態
         isFocus = false;
     }

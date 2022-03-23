@@ -305,6 +305,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &270121546 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8499349960647651094, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+    type: 3}
+  m_PrefabInstance: {fileID: 8499349959081508160}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 323cd085dbe88e047846b5fc76234ab4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &643607714
 GameObject:
   m_ObjectHideFlags: 0
@@ -356,8 +368,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb53b898e24de484fa7d714ea671c847, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updatePhotoBytes: 0
-  updateInteval: 0.1
   UIRawImage: {fileID: 643607718}
 --- !u!114 &643607717
 MonoBehaviour:
@@ -2024,6 +2034,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8499349959829528191, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: shootController
+      value: 
+      objectReference: {fileID: 270121546}
     - target: {fileID: 8499349960647651093, guid: 0f733eddbc9e166459d46a2bb7c62f78,
         type: 3}
       propertyPath: bgm_audio
@@ -2034,5 +2049,10 @@ PrefabInstance:
       propertyPath: shootRecorder
       value: 
       objectReference: {fileID: 310379246599833001}
+    - target: {fileID: 8499349960647651094, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: shootSpeed
+      value: 40
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0f733eddbc9e166459d46a2bb7c62f78, type: 3}

@@ -1480,6 +1480,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8499349959829528191, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: shootController
+      value: 
+      objectReference: {fileID: 411266453}
     - target: {fileID: 8499349960647651093, guid: 0f733eddbc9e166459d46a2bb7c62f78,
         type: 3}
       propertyPath: bgm_audio
@@ -1490,5 +1495,10 @@ PrefabInstance:
       propertyPath: shootRecorder
       value: 
       objectReference: {fileID: 310379246599833001}
+    - target: {fileID: 8499349960647651094, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: shootSpeed
+      value: 40
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0f733eddbc9e166459d46a2bb7c62f78, type: 3}
