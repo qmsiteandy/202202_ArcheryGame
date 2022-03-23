@@ -11,16 +11,16 @@ public class ConcentrationSystem : MonoBehaviour
     [Header("Azure Endpoints and Secrets")]
     private string[] baseEndpoint =
     {
-        //"https://eastus.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
-        //"https://eastus2.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
+        "https://eastus.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
+        "https://eastus2.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
         "https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
-        //"https://japaneast.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
-        //"https://japanwest.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
+        "https://japaneast.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
+        "https://japanwest.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
     };
     private string[] clientSecret =
     {
-        //"83fef2b759104079b5ffe68e7a8bbb60",
-        //"d964266b05454d419b8a5b2185b2183d",
+        "83fef2b759104079b5ffe68e7a8bbb60",
+        "d964266b05454d419b8a5b2185b2183d",
         "4b66c477f57a4f208990124e15adb976",
         "8a547d53bc2249b68f1c5206b8c82d85",
         "e1fe91cd774c4138a1b5661d72b1cfa1"
@@ -29,9 +29,9 @@ public class ConcentrationSystem : MonoBehaviour
 
     [Header("Azure Detection")]
     [SerializeField] private AzureFaceResponse azureFaceResponse = new AzureFaceResponse();
-    private float detectInterval = 0.5f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
+    private float detectInterval = 0.25f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
+    private float detectIntervalTimer = 0f;
     private Coroutine detectRouting;
-    private bool isDetecting = false;
 
     [Header("Gaze Detection")]
     private Vector2 gazePos;    //目前凝視位置
@@ -43,9 +43,11 @@ public class ConcentrationSystem : MonoBehaviour
     private bool isGazeHolding = false; //偵測是否判斷為凝視狀態
 
     [Header("Concentration Detect")]
+    private bool isDetecting = false;
     public bool isFocus = false;
     [Range(0, 1)] public float concentration = 0f;    //專注度
     public float concentrationRecoveryTime = 5f;    //從0->1慢慢增加的時間
+    private float concentrationUpdateTime = 0f;
 
     [Header("UI")]
     public GameObject faceDetectUI;
@@ -59,6 +61,14 @@ public class ConcentrationSystem : MonoBehaviour
 
     private void Update()
     {
+        //每N秒呼叫一次API，等API回傳後立即運算專注度
+        if(isDetecting && detectIntervalTimer < Time.time)
+        {
+            detectIntervalTimer = Time.time + detectInterval;
+            StartCoroutine(FocusDetect());
+        }
+        
+
         if (isFocus)
         {
             //專注狀態，慢慢增加專注度
@@ -93,7 +103,6 @@ public class ConcentrationSystem : MonoBehaviour
 
             //取得輪流使用的endpoint&secret
             string[] faceApiAndSecret = GetFaceApiAndSecret();
-            Debug.Log($"faceApi: {faceApiAndSecret[0]}");
 
             WWWForm webForm = new WWWForm();
             using (UnityWebRequest www = UnityWebRequest.Post(faceApiAndSecret[0], webForm))
@@ -245,30 +254,40 @@ public class ConcentrationSystem : MonoBehaviour
         //Azure Requese Interval，考量Azure免費方案有呼叫API頻率限制
         //yield return new WaitForSeconds(detectInterval);
 
-        Debug.Log($"此次專注判斷耗時 { Time.time - FocusDetectStartTime} 秒");
+        //Debug.Log($"此次專注判斷耗時 { Time.time - FocusDetectStartTime} 秒");
 
-        //下一次運算
-        detectRouting = StartCoroutine(FocusDetect());
+        if(concentrationUpdateTime != 0f)
+        {
+            Debug.Log($"專注度更新時間 { Time.time - FocusDetectStartTime} 秒");
+        }
+        concentrationUpdateTime = Time.time;
+
+
+        // //下一次運算
+        // detectRouting = StartCoroutine(FocusDetect());
     }
 
     public void FocusDetectionStart()
     {
         //開啟介面
         faceDetectUI.SetActive(true);
-        //開始執行判斷
-        detectRouting = StartCoroutine(FocusDetect());
+        // //開始執行判斷
+        // detectRouting = StartCoroutine(FocusDetect());
+
+        isDetecting = true;
     }
 
     public void FocusDetectionReset()
     {
         //關閉介面
         faceDetectUI.SetActive(false);
-        //停止判斷
-        if (detectRouting != null)
-        {
-            StopCoroutine(detectRouting);
-            detectRouting = null;
-        }
+        // //停止判斷
+        // if (detectRouting != null)
+        // {
+        //     StopCoroutine(detectRouting);
+        //     detectRouting = null;
+        // }
+        isDetecting = false;
         //設定專注狀態
         isFocus = false;
     }
