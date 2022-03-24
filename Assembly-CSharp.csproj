@@ -63,9 +63,10 @@
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\Scripts\IntroPage.cs" />
      <Compile Include="Assets\Scripts\Models\AzureFaceResponse.cs" />
+     <Compile Include="Assets\Scripts\RelaxPage.cs" />
      <Compile Include="Assets\Scripts\RingData.cs" />
      <Compile Include="Assets\Scripts\ShootController.cs" />
-     <Compile Include="Assets\Scripts\ShootRecorder.cs" />
+     <Compile Include="Assets\Scripts\ShootManager.cs" />
      <Compile Include="Assets\Scripts\SoundController.cs" />
      <Compile Include="Assets\Scripts\ThirdPersonCamera.cs" />
      <Compile Include="Assets\Scripts\WebCamController.cs" />

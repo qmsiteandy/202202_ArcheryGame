@@ -22,7 +22,11 @@ public class ArrowController : MonoBehaviour
         timer += Time.deltaTime;
         if(timer > 3f && !isHit)
         {
-            GameObject.Find("ShootRecorder").GetComponent<ShootRecorder>().Record(0);
+            GameObject.Find("ShootManager").GetComponent<ShootManager>().Record(0);
+
+            //箭停止時呼叫
+            FindObjectOfType<ShootManager>().OnArrowInactive();
+
             Destroy(this.gameObject);
         }
 
@@ -59,8 +63,11 @@ public class ArrowController : MonoBehaviour
 
             //算分數
             int score = collision.gameObject.GetComponent<RingData>().score;
-            GameObject.Find("ShootRecorder").GetComponent<ShootRecorder>().Record(score);
+            GameObject.Find("ShootManager").GetComponent<ShootManager>().Record(score);
             Debug.Log(score);
+
+            //箭停止時呼叫
+            FindObjectOfType<ShootManager>().OnArrowInactive();
 
             //1秒後刪除跟隨的鏡頭
             Destroy(this.GetComponentInChildren<CinemachineVirtualCamera>().gameObject, 1f);
