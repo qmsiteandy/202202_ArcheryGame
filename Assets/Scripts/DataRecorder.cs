@@ -6,29 +6,42 @@ using System.IO;
 
 public class DataRecorder : MonoBehaviour
 {
-	private float mwConnectedTime = 0f;
+	public float mwConnectedTime = 0f;
 
 	private string testMode = "";
 	private string testSys = "";
 
+	[Header("專注度")]
 	public ConcentrationSystem concentrationSystem;
 	public ShootController shootController;
 	private bool[] archeryProcess = new bool[50000];
 	private bool[] isFocus = new bool[50000];
 	private float[] concentration = new float[50000];
+	private string[] statusSring = new string[50000];
 
+	[Header("臉部資訊")]
+	private float[] emotionValue = new float[50000];
+	private float[] neutral = new float[50000];
+	private float[] happiness = new float[50000];
+	private float[] surprise = new float[50000];
+	private float[] sadness = new float[50000];
+	private float[] disgust = new float[50000];
+	private float[] anger = new float[50000];
+	private float[] fear = new float[50000];
+	private float[] pupilMidPosX = new float[50000];
+	private float[] pupilMidPosY = new float[50000];
+	private float[] gazePosX = new float[50000];
+	private float[] gazePosY = new float[50000];
+
+	[Header("腦波")]
 	private MindwaveDataESenseModel[] eSenseData = new MindwaveDataESenseModel[50000];
 
-	private float[] delta = new float[50000];
-	private float[] theta = new float[50000];
-	private float[] lowAlpha = new float[50000];
-	private float[] highAlpha = new float[50000];
-	private float[] lowBeta = new float[50000];
-	private float[] highBeta = new float[50000];
-	private float[] lowGamma = new float[50000];
-	private float[] highGamma = new float[50000];
+	[Header("時間紀錄")]
+	public GameTimer gameTimer;
 	private float[] gameTime = new float[50000];
 	private string[] datetime = new string[50000];
+
+
 
 	[SerializeField]
 	public MindwaveCalibrator m_Calibrator = null;
@@ -49,36 +62,37 @@ public class DataRecorder : MonoBehaviour
 	{
 		if (mwConnectedTime == 0f) mwConnectedTime = Time.time;
 
+
+
 		eSenseData[dataCount] = _Data.eSense;
-		gameTime[dataCount] = Time.time - mwConnectedTime;
+		gameTime[dataCount] = gameTimer.timer;
 		datetime[dataCount] = DateTime.Now.ToString("yyyyMMdd-HHmmss");
 
-		//紀錄原始數值
-		delta[dataCount] = _Data.eegPower.delta;
-		theta[dataCount] = _Data.eegPower.theta;
-		lowAlpha[dataCount] = _Data.eegPower.lowAlpha;
-		highAlpha[dataCount] = _Data.eegPower.highAlpha;
-		lowBeta[dataCount] = _Data.eegPower.lowBeta;
-		highBeta[dataCount] = _Data.eegPower.highBeta;
-		lowGamma[dataCount] = _Data.eegPower.lowGamma;
-		highGamma[dataCount] = _Data.eegPower.highGamma;
-
-		//紀錄數值比例
-		//delta[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.Delta, _Data.eegPower.delta);
-		//theta[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.Theta, _Data.eegPower.theta);
-		//lowAlpha[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.LowAlpha, _Data.eegPower.lowAlpha);
-		//highAlpha[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.HighAlpha, _Data.eegPower.highAlpha);
-		//lowBeta[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.LowBeta, _Data.eegPower.lowBeta);
-		//highBeta[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.HighBeta, _Data.eegPower.highBeta);
-		//lowGamma[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.LowGamma, _Data.eegPower.lowGamma);
-		//highGamma[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.HighGamma, _Data.eegPower.highGamma);
+		
 
 		archeryProcess[dataCount] = shootController.isArcheryProcess;
         if (concentrationSystem != null)
         {
 			isFocus[dataCount] = concentrationSystem.isFocus;
 			concentration[dataCount] = concentrationSystem.concentration;
+			emotionValue[dataCount] = concentrationSystem.emotionValue;
+			if(concentrationSystem.azureFaceResponse.faceList.Length > 0)
+            {
+				neutral[dataCount] = concentrationSystem.azureFaceResponse.faceList[0].faceAttributes.emotion.neutral;
+				happiness[dataCount] = concentrationSystem.azureFaceResponse.faceList[0].faceAttributes.emotion.happiness;
+				surprise[dataCount] = concentrationSystem.azureFaceResponse.faceList[0].faceAttributes.emotion.surprise;
+				sadness[dataCount] = concentrationSystem.azureFaceResponse.faceList[0].faceAttributes.emotion.sadness;
+				disgust[dataCount] = concentrationSystem.azureFaceResponse.faceList[0].faceAttributes.emotion.disgust;
+				anger[dataCount] = concentrationSystem.azureFaceResponse.faceList[0].faceAttributes.emotion.anger;
+				fear[dataCount] = concentrationSystem.azureFaceResponse.faceList[0].faceAttributes.emotion.fear;
+				pupilMidPosX[dataCount] = concentrationSystem.pupilMidPos.x;
+				pupilMidPosY[dataCount] = concentrationSystem.pupilMidPos.y;
+				gazePosX[dataCount] = concentrationSystem.gazePos.x;
+				gazePosY[dataCount] = concentrationSystem.gazePos.y;
+			}
+			statusSring[dataCount] = concentrationSystem.statusSring;
 		}
+
 
 		dataCount += 1;
 	}
@@ -96,7 +110,26 @@ public class DataRecorder : MonoBehaviour
 
 		using (StreamWriter stream = new StreamWriter(path))
 		{
-			stream.WriteLine("gameTime,datetime,mw_attention,mw_meditation,Delta,Theta,Low Alpha,High Alpha,Low Beta,High Beta,Low Gamma,High Gamma,sys_archeryProcess,sys_isFocus,sys_concentration");
+			stream.WriteLine("gameTime," +
+				"datetime," +
+				"mw_attention," +
+				"mw_meditation," +
+				"sys_archeryProcess," +
+				"face_emotionValue," +
+				"face_neutral," +
+				"face_happiness," +
+				"face_surprise," +
+				"face_sadness," +
+				"face_disgust," +
+				"face_anger," +
+				"face_fear," +
+				"face_pupilMidPosX," +
+				"face_pupilMidPosY," +
+				"gazePosX," +
+				"gazePosY," +
+				"sys_state," +
+				"sys_isFocus," +
+				"sys_concentration");
 
 			for (int i = 0; i < dataCount; ++i)
 			{
@@ -104,17 +137,22 @@ public class DataRecorder : MonoBehaviour
 					+ "," + datetime[i]
 					+ "," + eSenseData[i].attention
 					+ "," + eSenseData[i].meditation
-					+ "," + delta[i]
-					+ "," + theta[i]
-					+ "," + lowAlpha[i]
-					+ "," + highAlpha[i]
-					 + "," + lowBeta[i]
-					 + "," + highBeta[i]
-					 + "," + lowGamma[i]
-					 + "," + highGamma[i]
-					 + "," + archeryProcess[i]
-					 + "," + isFocus[i]
-					 + "," + concentration[i]);
+					+ "," + archeryProcess[i]
+					+ "," + emotionValue[i]
+					+ "," + neutral[i]
+					+ "," + happiness[i]
+					+ "," + surprise[i]
+					+ "," + sadness[i]
+					+ "," + disgust[i]
+					+ "," + anger[i]
+					+ "," + fear[i]
+					+ "," + pupilMidPosX[i]
+					+ "," + pupilMidPosY[i]
+					+ "," + gazePosX[i]
+					+ "," + gazePosY[i]
+					+ "," + statusSring[i]
+					+ "," + isFocus[i]
+					+ "," + concentration[i]);
 			}
 		}
 	}

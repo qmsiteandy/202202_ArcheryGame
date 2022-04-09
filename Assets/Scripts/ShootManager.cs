@@ -22,6 +22,7 @@ public class ShootManager : MonoBehaviour
     public RelaxPage relaxPage;
     public float relaxTime = 0f;
     public bool isRelaxing = false;
+    public AudioSource ringAudio;
  
 
     void Start()
@@ -81,5 +82,7 @@ public class ShootManager : MonoBehaviour
         isRelaxing = true;
         yield return new WaitForSeconds(relaxTime);
         isRelaxing = false;
+
+        ringAudio.Play();
     }
 }
