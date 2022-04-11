@@ -64,7 +64,6 @@ public class ArrowController : MonoBehaviour
             //算分數
             int score = collision.gameObject.GetComponent<RingData>().score;
             GameObject.Find("ShootManager").GetComponent<ShootManager>().Record(score);
-            Debug.Log(score);
 
             //箭停止時呼叫
             FindObjectOfType<ShootManager>().OnArrowInactive();

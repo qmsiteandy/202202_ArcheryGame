@@ -483,7 +483,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -505}
-  m_SizeDelta: {x: -1392.1, y: 221.71431}
+  m_SizeDelta: {x: -1392.1, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &643607716
 MonoBehaviour:
@@ -2174,7 +2174,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &3555602615786309724
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2537,6 +2537,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 535371155876411263, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8499349958689870400, guid: 0f733eddbc9e166459d46a2bb7c62f78,
         type: 3}
       propertyPath: m_LocalPosition.x

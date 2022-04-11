@@ -128,6 +128,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 535371155876411263, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 207.78572
+      objectReference: {fileID: 0}
     - target: {fileID: 8499349958689870400, guid: 0f733eddbc9e166459d46a2bb7c62f78,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -191,6 +196,11 @@ PrefabInstance:
     - target: {fileID: 8499349959502838044, guid: 0f733eddbc9e166459d46a2bb7c62f78,
         type: 3}
       propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8499349959829528188, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8499349960647651093, guid: 0f733eddbc9e166459d46a2bb7c62f78,
@@ -1325,7 +1335,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 757fc4fca0d98e942a4017ec08fb1499, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -2064,7 +2074,7 @@ MonoBehaviour:
   finishPage: {fileID: 1385462651}
   text_Score: {fileID: 1574632990}
   relaxPage: {fileID: 575524982}
-  relaxTime: 10
+  relaxTime: 0
   isRelaxing: 0
   ringAudio: {fileID: 1352132503}
 --- !u!4 &6420154616804310096 stripped
