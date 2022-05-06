@@ -15,7 +15,7 @@ public class GameTimer : MonoBehaviour
         if(dataRecorder.mwConnectedTime != 0f)
         {
             timer = Time.time - dataRecorder.mwConnectedTime;
-            timeText.text = "" + Mathf.FloorToInt(timer);
+            timeText.text = string.Format("{0:f1}", timer);
         }
     }
 }

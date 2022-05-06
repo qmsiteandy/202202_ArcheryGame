@@ -123,7 +123,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 10
+  m_Text: 0
 --- !u!1 &7204935072109091576
 GameObject:
   m_ObjectHideFlags: 0
@@ -378,11 +378,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mwConnectedTime: 0
+  gameTimer: {fileID: 0}
+  mw_dataCount: 0
   concentrationSystem: {fileID: 0}
   shootController: {fileID: 0}
-  gameTimer: {fileID: 0}
-  m_Calibrator: {fileID: 7755277597252790767}
-  dataCount: 0
+  sys_dataCount: 0
 --- !u!1001 &7653501190917778623
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -440,15 +440,3 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 7653501190917778623}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7755277597252790767 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 114548404811646288, guid: 8b4e4ddc023712f44a95397307ccaf60,
-    type: 3}
-  m_PrefabInstance: {fileID: 7653501190917778623}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6eb3bc418a0f5064f9ab597b87a4866c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

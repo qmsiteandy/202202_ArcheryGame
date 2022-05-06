@@ -48,6 +48,16 @@ public class ShootController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //專注數值影響
+        if (isConcentretionSystemActive)
+        {
+            //if (playerStatus == statusSring.drawing || playerStatus == statusSring.handling)
+            //{
+            float maskScale = Mathf.Lerp(6f, 1f, concentrationSystem.concentration);
+            concermMask.transform.DOScale(Vector3.one * maskScale, 0.15f);
+            concermMask.GetComponent<Image>().DOFade(concentrationSystem.concentration, 0.15f);
+        }
+
         if (shootManager.canShoot)
         {
             if (playerStatus == statusSring.idle && Input.GetKeyDown(KeyCode.Space))
@@ -112,18 +122,6 @@ public class ShootController : MonoBehaviour
             if (playerStatus != statusSring.idle)
             {
                 ResetStatus();
-            }
-        }
-
-
-        //專注數值影響
-        if (isConcentretionSystemActive)
-        {
-            if (playerStatus == statusSring.drawing || playerStatus == statusSring.handling)
-            {
-                float maskScale = Mathf.Lerp(6f, 1f, concentrationSystem.concentration);
-                concermMask.transform.DOScale(Vector3.one * maskScale, 0.15f);
-                concermMask.GetComponent<Image>().DOFade(concentrationSystem.concentration, 0.15f);
             }
         }
     }

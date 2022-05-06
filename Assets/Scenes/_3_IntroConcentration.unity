@@ -2072,6 +2072,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: -----UI-----
       objectReference: {fileID: 0}
+    - target: {fileID: 3065027801334666727, guid: 9b511ae0d15e9cf43ab9088ea63bb957,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3065027801334666728, guid: 9b511ae0d15e9cf43ab9088ea63bb957,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2617,6 +2622,11 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8499349959653428187, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8499349959829528188, guid: 0f733eddbc9e166459d46a2bb7c62f78,
         type: 3}
       propertyPath: m_IsActive
@@ -2627,6 +2637,11 @@ PrefabInstance:
       propertyPath: shootController
       value: 
       objectReference: {fileID: 270121546}
+    - target: {fileID: 8499349960012062205, guid: 0f733eddbc9e166459d46a2bb7c62f78,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8499349960647651093, guid: 0f733eddbc9e166459d46a2bb7c62f78,
         type: 3}
       propertyPath: bgm_audio

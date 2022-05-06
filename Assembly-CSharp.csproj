@@ -64,6 +64,7 @@
      <Compile Include="Assets\Scripts\GameTimer.cs" />
      <Compile Include="Assets\Scripts\IntroPage.cs" />
      <Compile Include="Assets\Scripts\Models\AzureFaceResponse.cs" />
+     <Compile Include="Assets\Scripts\Page_InputTester.cs" />
      <Compile Include="Assets\Scripts\RelaxPage.cs" />
      <Compile Include="Assets\Scripts\RingData.cs" />
      <Compile Include="Assets\Scripts\ShootController.cs" />

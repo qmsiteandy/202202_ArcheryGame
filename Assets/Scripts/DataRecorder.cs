@@ -8,9 +8,10 @@ public class DataRecorder : MonoBehaviour
 {
 	[Header("通用資訊")]
 	public float mwConnectedTime = 0f;
-	private string testMode = "";
-	private string testSys = "";
 	public GameTimer gameTimer;
+	private string testMode;
+	private string tester;
+	private string testSys;
 
 	[Header("腦波紀錄")]
 	private string[] mw_datetime = new string[50000];
@@ -45,9 +46,19 @@ public class DataRecorder : MonoBehaviour
 	{
 		MindwaveManager.Instance.Controller.OnUpdateMindwaveData += OnUpdateMindwaveData;
 
-		testMode = FindObjectOfType<GameManager>().mode;
-		testMode = testMode == "" ? "noMode" : testMode;
+		StartCoroutine(ResetDelay());
+	}
 
+	IEnumerator ResetDelay()
+    {
+		yield return new WaitForSeconds(1f);
+
+		GameManager gameManager = FindObjectOfType<GameManager>();
+
+		testMode = gameManager.mode;
+		testMode = (testMode != "") ? testMode : "noMode";
+		tester = gameManager.tester;
+		tester = (tester != "") ? tester : DateTime.Now.ToString("yyyyMMdd-HHmm");
 		testSys = concentrationSystem == null ? "noSys" : "withSys";
 	}
 
@@ -94,13 +105,13 @@ public class DataRecorder : MonoBehaviour
 
 	void OnDisable()
     {
-		WriteCsv_Mindwave();
-		if (concentrationSystem) WriteCsv_FaceSystem();
+		if (sys_dataCount > 0) WriteCsv_FaceSystem();
+		if (mw_dataCount > 0) WriteCsv_Mindwave();
 	}
 
 	public void WriteCsv_Mindwave()
 	{
-		string path = $"./data_{testMode}_{DateTime.Now.ToString("yyyyMMdd-HHmm")}_{testSys}_Mindwave.csv";
+		string path = $"./data_{tester}_{testSys}_Mindwave.csv";
 
 		if (!File.Exists(path)) File.Create(path).Dispose();
 
@@ -121,11 +132,13 @@ public class DataRecorder : MonoBehaviour
 					+ "," + mw_updateCostTime[i]);
 			}
 		}
+
+		Debug.Log("已建立 " + path);
 	}
 
 	public void WriteCsv_FaceSystem()
 	{
-		string path = $"./data_{testMode}_{DateTime.Now.ToString("yyyyMMdd-HHmm")}_{testSys}_FaceSystem.csv";
+		string path = $"./data_{tester}_{testSys}_FaceSystem.csv";
 
 		if (!File.Exists(path)) File.Create(path).Dispose();
 
@@ -168,5 +181,7 @@ public class DataRecorder : MonoBehaviour
 					+ "," + sys_updateCostTime[i]);
 			}
 		}
+
+		Debug.Log("已建立 " + path);
 	}
 }

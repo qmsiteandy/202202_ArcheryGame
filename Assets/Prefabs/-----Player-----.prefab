@@ -2733,7 +2733,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.8}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -3063,10 +3063,9 @@ MonoBehaviour:
   azureFaceResponse:
     faceList: []
   emotionValue: 0
-  thresholdDistance: 7
   isFocus: 0
   statusSring: 
-  concentration: 1
+  concentration: 0
   concentrationRecoveryTime: 5
   updateCostTime: 0
   faceDetectUI: {fileID: 8499349958937223039}
@@ -3134,7 +3133,7 @@ AudioSource:
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
