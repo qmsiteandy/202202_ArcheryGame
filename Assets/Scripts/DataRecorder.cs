@@ -6,42 +6,59 @@ using System.IO;
 
 public class DataRecorder : MonoBehaviour
 {
-	private float mwConnectedTime = 0f;
+	[Header("通用資訊")]
+	public float mwConnectedTime = 0f;
+	public GameTimer gameTimer;
+	private string testMode;
+	private string tester;
+	private string testSys;
 
-	private string testMode = "";
-	private string testSys = "";
+	[Header("腦波紀錄")]
+	private string[] mw_datetime = new string[50000];
+	private float[] mw_gameTime = new float[50000];
+	private bool[] mw_archeryProcess = new bool[50000];
+	private float[] mw_attention = new float[50000];
+	private float[] mw_updateCostTime = new float[50000];
+	public int mw_dataCount = 0;
 
+	[Header("專注度")]
 	public ConcentrationSystem concentrationSystem;
 	public ShootController shootController;
-	private bool[] archeryProcess = new bool[50000];
-	private bool[] isFocus = new bool[50000];
-	private float[] concentration = new float[50000];
-
-	private MindwaveDataESenseModel[] eSenseData = new MindwaveDataESenseModel[50000];
-
-	private float[] delta = new float[50000];
-	private float[] theta = new float[50000];
-	private float[] lowAlpha = new float[50000];
-	private float[] highAlpha = new float[50000];
-	private float[] lowBeta = new float[50000];
-	private float[] highBeta = new float[50000];
-	private float[] lowGamma = new float[50000];
-	private float[] highGamma = new float[50000];
-	private float[] gameTime = new float[50000];
-	private string[] datetime = new string[50000];
-
-	[SerializeField]
-	public MindwaveCalibrator m_Calibrator = null;
-
-	public int dataCount = 0;
+	private string[] sys_datetime = new string[50000];
+	private float[] sys_gameTime = new float[50000];
+	private bool[] sys_archeryProcess = new bool[50000];
+	private bool[] sys_isFocus = new bool[50000];
+	private float[] sys_concentration = new float[50000];
+	private string[] sys_statusSring = new string[50000];
+	private float[] sys_updateCostTime = new float[50000];
+	private float[] sys_emotionValue = new float[50000];
+	private float[] sys_neutral = new float[50000];
+	private float[] sys_happiness = new float[50000];
+	private float[] sys_surprise = new float[50000];
+	private float[] sys_sadness = new float[50000];
+	private float[] sys_disgust = new float[50000];
+	private float[] sys_anger = new float[50000];
+	private float[] sys_fear = new float[50000];
+	private float[] sys_gazeMoveDist = new float[50000];
+	public int sys_dataCount = 0;
 
 	private void Start()
 	{
 		MindwaveManager.Instance.Controller.OnUpdateMindwaveData += OnUpdateMindwaveData;
 
-		testMode = FindObjectOfType<GameManager>().mode;
-		testMode = testMode == "" ? "noMode" : testMode;
+		StartCoroutine(ResetDelay());
+	}
 
+	IEnumerator ResetDelay()
+    {
+		yield return new WaitForSeconds(1f);
+
+		GameManager gameManager = FindObjectOfType<GameManager>();
+
+		testMode = gameManager.mode;
+		testMode = (testMode != "") ? testMode : "noMode";
+		tester = gameManager.tester;
+		tester = (tester != "") ? tester : DateTime.Now.ToString("yyyyMMdd-HHmm");
 		testSys = concentrationSystem == null ? "noSys" : "withSys";
 	}
 
@@ -49,73 +66,122 @@ public class DataRecorder : MonoBehaviour
 	{
 		if (mwConnectedTime == 0f) mwConnectedTime = Time.time;
 
-		eSenseData[dataCount] = _Data.eSense;
-		gameTime[dataCount] = Time.time - mwConnectedTime;
-		datetime[dataCount] = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+		mw_gameTime[mw_dataCount] = gameTimer.timer;
+		mw_datetime[mw_dataCount] = DateTime.Now.ToString("yyyyMMdd-HHmmssfff");
+		if (mw_dataCount > 0) mw_updateCostTime[mw_dataCount] = gameTimer.timer - mw_gameTime[mw_dataCount - 1];
 
-		//紀錄原始數值
-		delta[dataCount] = _Data.eegPower.delta;
-		theta[dataCount] = _Data.eegPower.theta;
-		lowAlpha[dataCount] = _Data.eegPower.lowAlpha;
-		highAlpha[dataCount] = _Data.eegPower.highAlpha;
-		lowBeta[dataCount] = _Data.eegPower.lowBeta;
-		highBeta[dataCount] = _Data.eegPower.highBeta;
-		lowGamma[dataCount] = _Data.eegPower.lowGamma;
-		highGamma[dataCount] = _Data.eegPower.highGamma;
+		mw_archeryProcess[mw_dataCount] = shootController.isArcheryProcess;
+		mw_attention[mw_dataCount] = _Data.eSense.attention;
 
-		//紀錄數值比例
-		//delta[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.Delta, _Data.eegPower.delta);
-		//theta[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.Theta, _Data.eegPower.theta);
-		//lowAlpha[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.LowAlpha, _Data.eegPower.lowAlpha);
-		//highAlpha[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.HighAlpha, _Data.eegPower.highAlpha);
-		//lowBeta[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.LowBeta, _Data.eegPower.lowBeta);
-		//highBeta[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.HighBeta, _Data.eegPower.highBeta);
-		//lowGamma[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.LowGamma, _Data.eegPower.lowGamma);
-		//highGamma[dataCount] = m_Calibrator.EvaluateRatio(Brainwave.HighGamma, _Data.eegPower.highGamma);
+		mw_dataCount += 1;
+	}
 
-		archeryProcess[dataCount] = shootController.isArcheryProcess;
-        if (concentrationSystem != null)
+	public void OnUpdateConcentrationData(AzureFaceResponse _azureFaceResponse, float _emotionValue, float _gazeMoveDist, bool _isFocus, float _concentration, string _statusSring, float _updateCostTime)
+    {
+		sys_gameTime[sys_dataCount] = gameTimer.timer;
+		sys_datetime[sys_dataCount] = DateTime.Now.ToString("yyyyMMdd-HHmmssfff");
+		sys_archeryProcess[sys_dataCount] = shootController.isArcheryProcess;
+
+		if (_azureFaceResponse.faceList.Length > 0)
         {
-			isFocus[dataCount] = concentrationSystem.isFocus;
-			concentration[dataCount] = concentrationSystem.concentration;
-		}
+			sys_neutral[sys_dataCount] = _azureFaceResponse.faceList[0].faceAttributes.emotion.neutral;
+			sys_happiness[sys_dataCount] = _azureFaceResponse.faceList[0].faceAttributes.emotion.happiness;
+			sys_surprise[sys_dataCount] = _azureFaceResponse.faceList[0].faceAttributes.emotion.surprise;
+			sys_sadness[sys_dataCount] = _azureFaceResponse.faceList[0].faceAttributes.emotion.sadness;
+			sys_disgust[sys_dataCount] = _azureFaceResponse.faceList[0].faceAttributes.emotion.disgust;
+			sys_anger[sys_dataCount] = _azureFaceResponse.faceList[0].faceAttributes.emotion.anger;
+			sys_fear[sys_dataCount] = _azureFaceResponse.faceList[0].faceAttributes.emotion.fear;
 
-		dataCount += 1;
+			sys_gazeMoveDist[sys_dataCount] = _gazeMoveDist;
+        }
+		sys_emotionValue[sys_dataCount] = _emotionValue;
+		sys_isFocus[sys_dataCount] = _isFocus;
+		sys_concentration[sys_dataCount] = _concentration;
+		sys_statusSring[sys_dataCount] = _statusSring;
+		sys_updateCostTime[sys_dataCount] = _updateCostTime;
+
+		sys_dataCount += 1;
 	}
 
 	void OnDisable()
     {
-		WriteCsv();
+		if (sys_dataCount > 0) WriteCsv_FaceSystem();
+		if (mw_dataCount > 0) WriteCsv_Mindwave();
 	}
 
-	public void WriteCsv()
+	public void WriteCsv_Mindwave()
 	{
-		string path = $"./data_{testMode}_{DateTime.Now.ToString("yyyyMMdd-HHmm")}_{testSys}.csv";
+		string path = $"./data_{tester}_{testSys}_Mindwave.csv";
 
 		if (!File.Exists(path)) File.Create(path).Dispose();
 
 		using (StreamWriter stream = new StreamWriter(path))
 		{
-			stream.WriteLine("gameTime,datetime,mw_attention,mw_meditation,Delta,Theta,Low Alpha,High Alpha,Low Beta,High Beta,Low Gamma,High Gamma,sys_archeryProcess,sys_isFocus,sys_concentration");
+			stream.WriteLine("gameTime," +
+				"datetime," +
+				"archeryProcess," +
+				"mw_attention," +
+				"mw_updateCostTime");
 
-			for (int i = 0; i < dataCount; ++i)
+			for (int i = 0; i < mw_dataCount; ++i)
 			{
-				stream.WriteLine(gameTime[i]
-					+ "," + datetime[i]
-					+ "," + eSenseData[i].attention
-					+ "," + eSenseData[i].meditation
-					+ "," + delta[i]
-					+ "," + theta[i]
-					+ "," + lowAlpha[i]
-					+ "," + highAlpha[i]
-					 + "," + lowBeta[i]
-					 + "," + highBeta[i]
-					 + "," + lowGamma[i]
-					 + "," + highGamma[i]
-					 + "," + archeryProcess[i]
-					 + "," + isFocus[i]
-					 + "," + concentration[i]);
+				stream.WriteLine(mw_gameTime[i]
+					+ "," + mw_datetime[i]
+					+ "," + mw_archeryProcess[i]
+					+ "," + mw_attention[i]
+					+ "," + mw_updateCostTime[i]);
 			}
 		}
+
+		Debug.Log("已建立 " + path);
+	}
+
+	public void WriteCsv_FaceSystem()
+	{
+		string path = $"./data_{tester}_{testSys}_FaceSystem.csv";
+
+		if (!File.Exists(path)) File.Create(path).Dispose();
+
+		using (StreamWriter stream = new StreamWriter(path))
+		{
+			stream.WriteLine("gameTime," +
+				"datetime," +
+				"archeryProcess," +
+				"face_emotionValue," +
+				"face_neutral," +
+				"face_happiness," +
+				"face_surprise," +
+				"face_sadness," +
+				"face_disgust," +
+				"face_anger," +
+				"face_fear," +
+				"sys_gazeMoveDist," +
+				"sys_state," +
+				"sys_isFocus," +
+				"sys_concentration," +
+				"sys_updateCostTime");
+
+			for (int i = 0; i < sys_dataCount; ++i)
+			{
+				stream.WriteLine(sys_gameTime[i]
+					+ "," + sys_datetime[i]
+					+ "," + sys_archeryProcess[i]
+					+ "," + sys_emotionValue[i]
+					+ "," + sys_neutral[i]
+					+ "," + sys_happiness[i]
+					+ "," + sys_surprise[i]
+					+ "," + sys_sadness[i]
+					+ "," + sys_disgust[i]
+					+ "," + sys_anger[i]
+					+ "," + sys_fear[i]
+					+ "," + sys_gazeMoveDist[i]
+					+ "," + sys_statusSring[i]
+					+ "," + sys_isFocus[i]
+					+ "," + sys_concentration[i]
+					+ "," + sys_updateCostTime[i]);
+			}
+		}
+
+		Debug.Log("已建立 " + path);
 	}
 }

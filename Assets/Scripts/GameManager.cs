@@ -9,11 +9,12 @@ public class GameManager : MonoBehaviour
 
     //場景順序
     private int sceneindex = 0;
-    private string[] sceneSeq;
+    private string[] sceneSeq = {};
 
     public string mode = "";
+    public string tester = "";
 
-    void Start()
+    void Awake()
     {
         if (!isDontDestroy)
         {
@@ -32,18 +33,24 @@ public class GameManager : MonoBehaviour
         if(_mode == "A")
         {
             mode = _mode;
-            sceneSeq = new string[] { "_1_IntroScene", "_2_SceneNormal", "_3_IntroConcentration", "_4_SceneConcentration", "_5_EndSenen" };
+            sceneSeq = new string[] { "_1_IntroScene", "_2_SceneNormal", "_S_Survey", "_3_IntroConcentration", "_4_SceneConcentration", "_5_EndSenen" };
         }
         //先專注模式再普通模式
         else if(_mode == "B")
         {
             mode = _mode;
-            sceneSeq = new string[] { "_1_IntroScene", "_3_IntroConcentration", "_4_SceneConcentration", "_2_SceneNormal", "_5_EndSenen" };
+            sceneSeq = new string[] { "_1_IntroScene", "_3_IntroConcentration", "_4_SceneConcentration", "_S_Survey", "_2_SceneNormal", "_5_EndSenen" };
         }
+    }
+
+    public void SetTester(string _tester)
+    {
+        tester = _tester;
     }
 
     public void NextScene()
     {
+        if (sceneSeq.Length == 0) return;
         if(sceneindex < sceneSeq.Length)
         {
             SceneManager.LoadScene(sceneSeq[sceneindex]);

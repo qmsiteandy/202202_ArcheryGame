@@ -1,18 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
     [Header("視角旋轉")]
     public Transform cameraHolder;
     //垂直旋轉設定
-    public float sensitivityVert = 9f;
+    public float sensitivityVert = 1f;
     public float minmumVert = -45f;
     public float maxmumVert = 45f;
     private float _rotationX = 0;
     //水平旋轉設定
-    public float sensitivityHor = 9f;
+    public float sensitivityHor = 1f;
     public float minmumHor = -60f;
     public float maxmumHor = 60f;
     private float _rotationY = 0;
@@ -65,7 +66,7 @@ public class ThirdPersonCamera : MonoBehaviour
         }
 
         //設定相機旋轉
-        cameraHolder.localEulerAngles = new Vector3(_rotationX + noiseRotateX, _rotationY + noiseRotateY, 0);
+        cameraHolder.DOLocalRotate(new Vector3(_rotationX + noiseRotateX, _rotationY + noiseRotateY, 0), 0.1f);
     }
 
     public void ResetAngle()

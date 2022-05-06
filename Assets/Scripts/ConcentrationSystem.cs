@@ -11,31 +11,50 @@ public class ConcentrationSystem : MonoBehaviour
     [Header("Azure Endpoints and Secrets")]
     private string[] baseEndpoint =
     {
-        "https://eastus.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
-        "https://eastus2.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
-        "https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
-        "https://japaneast.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
-        "https://japanwest.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",
+        "https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",  //此服務在本帳中
+        "https://japaneast.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True", //此服務在本帳中
+        "https://japanwest.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True", //此服務在本帳中
+        "https://koreacentral.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",    //此服務在本帳中
+        "https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",  //此服務在碩士帳中
+        "https://japaneast.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True", //此服務在碩士帳中
+        "https://japanwest.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True", //此服務在碩士帳中
+        "https://koreacentral.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",    //此服務在碩士帳中
+        "https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",  //此服務在潘帳中
+        "https://japaneast.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True", //此服務在潘帳中
+        "https://japanwest.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True", //此服務在潘帳中
+        "https://koreacentral.api.cognitive.microsoft.com/face/v1.0/detect?overload=stream&returnFaceAttributes=emotion&returnFaceLandmarks=True",    //此服務在潘帳中
     };
     private string[] clientSecret =
     {
-        "83fef2b759104079b5ffe68e7a8bbb60",
-        "d964266b05454d419b8a5b2185b2183d",
-        "4b66c477f57a4f208990124e15adb976",
-        "8a547d53bc2249b68f1c5206b8c82d85",
-        "e1fe91cd774c4138a1b5661d72b1cfa1"
+        "4b66c477f57a4f208990124e15adb976", //本帳中eastasia
+        "8a547d53bc2249b68f1c5206b8c82d85", //本帳中japaneast
+        "e1fe91cd774c4138a1b5661d72b1cfa1", //本帳中japanwest
+        "1f45fb1a1eae40128e807a6d152fdfa3", //本帳中koreacentral
+        "0f78ef77914d4299943e3391ecedad9e", //碩士帳中eastasia
+        "1ee55e4982964241a5a95597d451bfa4", //碩士帳中japaneast
+        "8d1660db1bb64216a00a70e60704962c", //碩士帳中japanwest
+        "4f9b8562b3a345b38a0727337452c938", //碩士帳中koreacentral
+        "2eb8f2660c6b4751a9ca3b4c834f6054", //潘帳中eastasia
+        "6587b3ef32164f8c9fe4503b69b6da37", //潘帳中japaneast
+        "1caca48a14b342538dba5554d2c3a11f", //潘帳中japanwest
+        "9c15571866434b3db58a5357d14b53ed", //潘帳中koreacentral
     };
     private int faceApiIndex = 0;
 
     [Header("Azure Detection")]
-    [SerializeField] private AzureFaceResponse azureFaceResponse = new AzureFaceResponse();
-    private float detectInterval = 0.25f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
+    [SerializeField] public AzureFaceResponse azureFaceResponse = new AzureFaceResponse();
+    private float detectInterval = 0.2f;    //偵測週期，考量Azure免費方案有呼叫API頻率限制
     private float detectIntervalTimer = 0f;
 
+    [Header("Emotion")]
+    public float emotionValue = 0f;
+         
     [Header("Gaze Detection")]
     private Vector2 gazePos;    //目前凝視位置
-    private float thresholdDistance = 50f;   //誤差距離閾值，若瞬間位移超過此值，判定可能是數值誤差
-    private float errorThresholdTime = 0.25f;   //誤差判定時間，若誤差持續時間小於此值，判定是誤差
+    private Vector2 pupilMidPos;  //最新的位置
+    private float gazeMoveDist = 0f;
+    private float thresholdDistance = 7f;   //誤差距離閾值，若瞬間位移超過此值，判定可能是數值誤差
+    private float errorThresholdTime = 0.1f;   //誤差判定時間，若誤差持續時間小於此值，判定是誤差
     private float errorThresholdTimer = 0f;
     private float gazeHoldingTime = 1f;   //凝視時間，大於此閾值才算有專注
     private float gazeHoldingTimer = 0f;
@@ -43,9 +62,12 @@ public class ConcentrationSystem : MonoBehaviour
 
     [Header("Concentration Detect")]
     public bool isFocus = false;
+    public string statusSring = "";
     [Range(0, 1)] public float concentration = 0f;    //專注度
     public float concentrationRecoveryTime = 5f;    //從0->1慢慢增加的時間
-    private float concentrationUpdateTime = 0f;
+    private float lastUpdateTime = 0f;
+    public float updateCostTime = 0f;
+    private List<Coroutine> detect_Routine = new List<Coroutine>();
 
     [Header("UI")]
     public GameObject faceDetectUI;
@@ -54,6 +76,9 @@ public class ConcentrationSystem : MonoBehaviour
 
     [Header("Player")]
     public ShootController shootController;
+
+    [Header("Record")]
+    public DataRecorder dataRecorder;
 
     private void Start()
     {
@@ -66,7 +91,7 @@ public class ConcentrationSystem : MonoBehaviour
         if(shootController.isArcheryProcess && detectIntervalTimer < Time.time)
         {
             detectIntervalTimer = Time.time + detectInterval;
-            StartCoroutine(FocusDetect());
+            detect_Routine.Add(StartCoroutine(FocusDetect()));
         }
 
 
@@ -141,7 +166,10 @@ public class ConcentrationSystem : MonoBehaviour
                         Debug.LogError($"statue:{www.responseCode} error:{www.error}");
                         ShowAzureError(www.responseCode, www.error);
 
-                        azureFaceResponse = null;
+                        //azureFaceResponse = null;
+
+                        //重置最後更新時間
+                        lastUpdateTime = 0f;
                     }
                 }
             }
@@ -154,6 +182,7 @@ public class ConcentrationSystem : MonoBehaviour
                 //沒有偵測到人臉
                 if (azureFaceResponse.faceList.Length == 0)
                 {
+                    statusSring = "No Face";
                     //設定Header文字
                     t_header.text = "偵測不到臉部";
 
@@ -163,7 +192,7 @@ public class ConcentrationSystem : MonoBehaviour
                 else
                 {
                     //依權重計算表情專注分數
-                    float emotionValue = azureFaceResponse.faceList[0].faceAttributes.emotion.neutral * 0.9f +
+                    emotionValue = azureFaceResponse.faceList[0].faceAttributes.emotion.neutral * 0.9f +
                         azureFaceResponse.faceList[0].faceAttributes.emotion.happiness * 0.6f +
                         azureFaceResponse.faceList[0].faceAttributes.emotion.surprise * 0.6f +
                         azureFaceResponse.faceList[0].faceAttributes.emotion.sadness * 0.3f +
@@ -171,9 +200,10 @@ public class ConcentrationSystem : MonoBehaviour
                         azureFaceResponse.faceList[0].faceAttributes.emotion.anger * 0.25f +
                         azureFaceResponse.faceList[0].faceAttributes.emotion.fear * 0.3f;
 
-                    //表情偵測為不專心(0.5是自己測試的數值)
-                    if (emotionValue < 0.5f)
+                    //表情偵測為不專心(0.8是自己測試的數值)
+                    if (emotionValue < 0.8f)
                     {
+                        statusSring = "Face Emotion Unfocus";
                         //設定Header文字
                         t_header.text = "情緒偵測為不專心";
 
@@ -183,15 +213,18 @@ public class ConcentrationSystem : MonoBehaviour
                     else
                     {
                         //凝視位置取左右瞳孔位置中點
-                        Vector2 newGazePos = new Vector2(
+                        pupilMidPos = new Vector2(
                             (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.x + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.x) * 0.5f,
                             (azureFaceResponse.faceList[0].faceLandmarks.pupilLeft.y + azureFaceResponse.faceList[0].faceLandmarks.pupilRight.y) * 0.5f);
 
-                        if (gazePos == null) gazePos = newGazePos;
+                        if (gazePos == Vector2.zero) { gazePos = pupilMidPos; }
                         else
                         {
+                            //Debug.Log((pupilMidPos - gazePos).magnitude + ", " + (pupilMidPos - gazePos).sqrMagnitude);
+                            gazeMoveDist = (pupilMidPos - gazePos).magnitude;
+
                             //瞳孔位移過大，但可能是誤差，需再判斷
-                            if (Vector2.SqrMagnitude(newGazePos - gazePos) > thresholdDistance)
+                            if (gazeMoveDist > thresholdDistance)
                             {
                                 //計時是否持續，若持續時間超過閾值，代表此位移為真
                                 if (errorThresholdTimer == 0f) errorThresholdTimer = Time.time + errorThresholdTime;
@@ -204,10 +237,11 @@ public class ConcentrationSystem : MonoBehaviour
                                         errorThresholdTimer = 0f;
                                         //重置凝視狀態
                                         isGazeHolding = false;
+                                        statusSring = "Pupils move too fast";
                                         //設定Header文字
                                         t_header.text = "瞳孔位移過快不專心";
                                         //紀錄新的瞳孔位置
-                                        gazePos = newGazePos;
+                                        gazePos = pupilMidPos;
                                         //設定專注狀態
                                         isFocus = false;
                                     }
@@ -219,7 +253,7 @@ public class ConcentrationSystem : MonoBehaviour
                                 //重置errorThresholdTimer
                                 errorThresholdTimer = 0f;
                                 //紀錄新的瞳孔位置
-                                gazePos = newGazePos;
+                                gazePos = pupilMidPos;
 
                                 //設定凝視判斷的計時器，需要持續凝視超過秒數才算專注
                                 if (!isGazeHolding)
@@ -240,6 +274,7 @@ public class ConcentrationSystem : MonoBehaviour
                                     {
                                         //設定專注狀態
                                         isFocus = true;
+                                        statusSring = "Focus";
                                         t_header.text = "";
                                     }
                                 }
@@ -252,96 +287,65 @@ public class ConcentrationSystem : MonoBehaviour
             #endregion  -----專注度判斷-----
         }
 
-        //Azure Requese Interval，考量Azure免費方案有呼叫API頻率限制
-        //yield return new WaitForSeconds(detectInterval);
 
-        //Debug.Log($"此次專注判斷耗時 { Time.time - FocusDetectStartTime} 秒");
-
-        if(concentrationUpdateTime != 0f)
+        if(lastUpdateTime != 0f)
         {
-            //Debug.Log($"專注度更新時間 { Time.time - FocusDetectStartTime} 秒");
+            //Debug.Log($"專注度更新時間 { Time.time - lastUpdateTime} 秒" );
+            updateCostTime = Time.time - lastUpdateTime;
         }
-        concentrationUpdateTime = Time.time;
+        lastUpdateTime = Time.time;
 
-
-        // //下一次運算
-        // detectRouting = StartCoroutine(FocusDetect());
+        //紀錄
+        if(dataRecorder != null)
+        {
+            dataRecorder.OnUpdateConcentrationData(azureFaceResponse, emotionValue, gazeMoveDist, isFocus, concentration, statusSring, updateCostTime);
+        }
     }
 
     public void FocusDetectionStart()
     {
         //開啟介面
         faceDetectUI.SetActive(true);
-        // //開始執行判斷
-        // detectRouting = StartCoroutine(FocusDetect());
+        outline.enabled = true;
+
+        //紀錄
+        if (dataRecorder != null)
+        {
+            dataRecorder.OnUpdateConcentrationData(azureFaceResponse, emotionValue, gazeMoveDist, isFocus, concentration, statusSring, updateCostTime);
+        }
     }
 
     public void FocusDetectionReset()
     {
         //關閉介面
         faceDetectUI.SetActive(false);
-        // //停止判斷
-        // if (detectRouting != null)
-        // {
-        //     StopCoroutine(detectRouting);
-        //     detectRouting = null;
-        // }
+        outline.enabled = false;
 
         //設定專注狀態
         isFocus = false;
+        statusSring = "";
+        concentration = 0f;
+
+        //重置最後更新時間
+        lastUpdateTime = 0f;
+
+        //停止routine
+        foreach (Coroutine routine in detect_Routine)
+        {
+            if (routine != null) StopCoroutine(routine);
+        }
+        detect_Routine = new List<Coroutine>();
+
+        //重置眼神紀錄
+        gazeMoveDist = 0f;
+        gazePos = Vector2.zero;
+
+        //紀錄
+        if (dataRecorder != null)
+        {
+            dataRecorder.OnUpdateConcentrationData(azureFaceResponse, emotionValue, gazeMoveDist, isFocus, concentration, statusSring, updateCostTime);
+        }
     }
-
-    //private async Task<AzureFaceResponse> AzureDetectImage(byte[] imageBytes)
-    //{
-    //    WWWForm webForm = new WWWForm();
-
-    //    //取得輪流使用的endpoint&secret
-    //    string[] faceApiAndSecret = GetFaceApiAndSecret();
-
-    //    using (UnityWebRequest www = UnityWebRequest.Post(faceApiAndSecret[0], webForm))
-    //    {
-    //        www.SetRequestHeader("Ocp-Apim-Subscription-Key", faceApiAndSecret[1]);
-    //        www.SetRequestHeader("Content-Type", "application/octet-stream");
-    //        www.uploadHandler.contentType = "application/json";
-    //        www.uploadHandler = new UploadHandlerRaw(imageBytes);
-    //        www.downloadHandler = new DownloadHandlerBuffer();
-
-    //        www.SendWebRequest();
-
-    //        while (!www.isDone)
-    //            await Task.Yield();
-
-    //        if (www.isNetworkError)
-    //        {
-    //            Debug.LogError($"statue:{www.responseCode} error:{www.error}");
-    //            ShowAzureError(www.responseCode, www.error);
-    //        }
-
-    //        AzureFaceResponse azureFaceResponse = null;
-
-    //        if (www.isDone)
-    //        {
-    //            if(www.responseCode / 100 == 2)
-    //            {
-    //                string data = System.Text.Encoding.UTF8.GetString(www.downloadHandler.data);
-    //                Debug.Log($"statue:{www.responseCode} data:{data}");
-
-    //                azureFaceResponse = JsonUtility.FromJson<AzureFaceResponse>("{\"faceList\":" + data + "}");
-
-    //                ShowAzureResponse(azureFaceResponse);
-
-    //                return (azureFaceResponse);
-    //            }
-    //            else
-    //            {
-    //                Debug.LogError($"statue:{www.responseCode} error:{www.error}");
-    //                ShowAzureError(www.responseCode, www.error);
-    //            }
-    //        }
-
-    //        return azureFaceResponse;
-    //    }
-    //}
 
     private void ShowAzureResponse(AzureFaceResponse azureFaceResponse)
     {
@@ -387,4 +391,6 @@ public class ConcentrationSystem : MonoBehaviour
         faceApiIndex = faceApiIndex + 1 >= baseEndpoint.Length ? faceApiIndex = 0 : faceApiIndex + 1;
         return new string[] { baseEndpoint[faceApiIndex], clientSecret[faceApiIndex] };
     }
+
+
 }

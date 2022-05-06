@@ -6,12 +6,12 @@ using System.IO;
 public class WebCamController : MonoBehaviour
 {
     public RawImage UIRawImage;
-    private WebCamTexture webCamTexture;
+    static private WebCamTexture webCamTexture;
     private byte[] photoBytes;
 
     void Start()
     {
-        webCamTexture = new WebCamTexture();
+        if (webCamTexture == null) webCamTexture = new WebCamTexture();
         UIRawImage.texture = webCamTexture;  //set webcam image on panel
         webCamTexture.Play();
     }

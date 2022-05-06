@@ -586,7 +586,7 @@ GameObject:
   - component: {fileID: 6725643203714280922}
   - component: {fileID: 6725643203714280923}
   m_Layer: 0
-  m_Name: ShootRecorder
+  m_Name: ShootManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -618,13 +618,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d835596ecbad484482de258bc590063, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  score: 0
-  arrow_init_count: 3
-  arrow_count: 0
-  text_score: {fileID: 0}
-  arrowsFolder: {fileID: 0}
-  finishPage: {fileID: 0}
-  text_Score: {fileID: 0}
 --- !u!1 &6725643204532774596
 GameObject:
   m_ObjectHideFlags: 0
